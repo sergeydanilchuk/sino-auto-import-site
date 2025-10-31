@@ -1,8 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  turbopack: {}, // включаем Turbopack и "глушим" ошибку
-};
+  // Автоматически отключаем Turbopack на Vercel
+  experimental: process.env.VERCEL ? {} : { turbo: {} },
+}
 
-export default nextConfig;
-
+export default nextConfig
