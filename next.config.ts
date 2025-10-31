@@ -1,10 +1,11 @@
-import type { NextConfig } from "next"
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // @ts-expect-error — отключаем turbopack, это допустимо
-    turbo: false,
+  // Turbopack отключать не нужно — Next сам выберет Webpack,
+  // если нет ключа "turbo" или других экспериментальных опций.
+  webpack: (config) => {
+    return config;
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;
