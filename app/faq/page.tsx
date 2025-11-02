@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { ChevronDown, Info } from "lucide-react"
 import { faqData } from "@/data/faqData"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/utils"
 import HomePageButton from "@/components/HomePageButton"
 
 export default function FaqPage() {

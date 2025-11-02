@@ -7,12 +7,6 @@ import { Moon, Sun, Phone, Menu } from "lucide-react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
@@ -49,43 +43,21 @@ export default function Header() {
 
           {/* Навигация — desktop */}
           <nav className="hidden xl:flex items-center space-x-4 text-sm font-medium">
-            <TooltipProvider delayDuration={100}>
-              {[
-                { label: "Как заказать", href: "/info/howorder" },
-                { label: "Каталог авто", disabled: true },
-                { label: "О компании", href: "/info/about" },
-                { label: "Контакты", href: "/#contacts" },
-              ].map((item) =>
-                item.disabled ? (
-                  <Tooltip key={item.label} disableHoverableContent={false}>
-                    <TooltipTrigger asChild>
-                      <div
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={(e) => e.preventDefault()}
-                        className="transition-colors duration-300 font-normal opacity-70 cursor-not-allowed select-none px-4 py-2 rounded-md hover:bg-accent/20"
-                      >
-                        {item.label}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      className="text-sm select-none pointer-events-none"
-                    >
-                      🚧 Раздел в разработке
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Button
-                    key={item.href ?? item.label}
-                    asChild
-                    variant="ghost"
-                    className="transition-colors duration-300 hover:text-primary font-normal"
-                  >
-                    <Link href={item.href ?? "/"}>{item.label}</Link>
-                  </Button>
-                )
-              )}
-            </TooltipProvider>
+            {[
+              { label: "Как заказать", href: "/info/howorder" },
+              { label: "Каталог авто", href: "/catalog" },
+              { label: "О компании", href: "/info/about" },
+              { label: "Контакты", href: "/#contacts" },
+            ].map((item) => (
+              <Button
+                key={item.href}
+                asChild
+                variant="ghost"
+                className="transition-colors duration-300 hover:text-primary font-normal"
+              >
+                <Link href={item.href}>{item.label}</Link>
+              </Button>
+            ))}
           </nav>
         </div>
 
@@ -164,38 +136,29 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col space-y-4 p-6">
-            <DialogTitle asChild>
-              <VisuallyHidden>
-                <h2>Меню навигации</h2>
-              </VisuallyHidden>
-            </DialogTitle>
+              <DialogTitle asChild>
+                <VisuallyHidden>
+                  <h2>Меню навигации</h2>
+                </VisuallyHidden>
+              </DialogTitle>
 
-            <nav className="flex flex-col space-y-3 text-base">
-              {[
-                { label: "Как заказать", href: "/howorder" },
-                { label: "Каталог авто", disabled: true },
-                { label: "О компании", href: "/about" },
-                { label: "Контакты", href: "/#contacts" },
-              ].map((item) =>
-                item.disabled ? (
-                  <span
-                    key={item.label}
-                    className="opacity-70 cursor-not-allowed select-none"
-                  >
-                    {item.label} 🚧
-                  </span>
-                ) : (
+              <nav className="flex flex-col space-y-3 text-base">
+                {[
+                  { label: "Как заказать", href: "/howorder" },
+                  { label: "Каталог авто", href: "/catalog" },
+                  { label: "О компании", href: "/about" },
+                  { label: "Контакты", href: "/#contacts" },
+                ].map((item) => (
                   <Link
-                    key={item.href ?? item.label}
-                    href={item.href ?? "/"}
+                    key={item.href}
+                    href={item.href}
                     className="hover:text-primary transition-colors"
                   >
                     {item.label}
                   </Link>
-                )
-              )}
-            </nav>
-          </SheetContent>
+                ))}
+              </nav>
+            </SheetContent>
           </Sheet>
         </div>
       </div>
