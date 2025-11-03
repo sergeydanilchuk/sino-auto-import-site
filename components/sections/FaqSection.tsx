@@ -16,7 +16,7 @@ export default function FaqSection() {
 
   return (
     <section className="py-16 bg-muted/30 border-t border-border/40">
-      <div className="container mx-auto px-12">
+      <div className="container mx-auto px-4">
         {/* Заголовок + кнопка справа */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
