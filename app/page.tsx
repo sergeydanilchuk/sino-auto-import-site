@@ -25,7 +25,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Секция с картинкой и главным текстом */}
-      <section className="relative flex flex-col items-center justify-center text-center py-24 md:py-40 px-12 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center text-center py-24 md:py-40 px-4 overflow-hidden">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,7 +61,7 @@ export default function HomePage() {
 
       {/* Почему выбирают нас? */}
       <section className="py-16 border-t border-border/40">
-        <div className="container mx-auto px-12">
+        <div className="container mx-auto px-4">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,7 +115,7 @@ export default function HomePage() {
 
       {/* Клиенты */}
       <section className="py-16 border-t border-border/40">
-        <div className="container mx-auto px-12">
+        <div className="container mx-auto px-4">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -259,7 +259,7 @@ export default function HomePage() {
                       <div className="mt-4 mb-5 bg-muted/60 p-5 rounded-lg border border-border relative">
                         <Quote className="absolute -top-3 -left-2 w-6 h-6 text-muted-foreground/50" />
                         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-center sm:text-left italic">
-                          “{client.review}”
+                          " {client.review} "
                         </p>
                         <Quote className="absolute -bottom-3 -right-2 w-6 h-6 text-muted-foreground/50 rotate-180" />
                       </div>
@@ -285,7 +285,7 @@ export default function HomePage() {
 
       {/* Этапы работы */}
       <section className="py-16 border-t border-border/40">
-        <div className="container mx-auto px-12">
+        <div className="container mx-auto px-4">
           {/* Заголовок и кнопки справа */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-12">
             <div>
@@ -385,7 +385,7 @@ export default function HomePage() {
 
       {/* Контакты */}
       <section id="contacts" className="py-20 border-t border-border/40 bg-muted/30">
-        <div className="container mx-auto px-12">
+        <div className="container mx-auto px-4">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
