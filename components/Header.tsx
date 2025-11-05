@@ -7,120 +7,76 @@ import { Moon, Sun, Phone, Menu, FileText, Building, HelpCircle } from "lucide-r
 import { useEffect, useState, useRef } from "react"
 import Image from "next/image"
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa"
-import { DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { cn } from "@/lib/utils/utils"
-import FlagIcon from "@/components/FlagIcon" // Импортируем компонент флагов
+import FlagIcon from "@/components/FlagIcon"
 
-// Кастомный компонент для выпадающего меню с задержкой закрытия
+// === НОВОЕ: формы и хук пользователя
+import LoginForm from "@/components/ui/LoginForm"
+import RegisterForm from "@/components/ui/RegisterForm"
+import { useMe } from "@/lib/useMe"
+
+// Кастомный компонент выпадающего меню
 function DropdownMenu({ title, items }: { title: string; items: Array<{ label: string; href: string; description: string; icon: string | React.ComponentType<any> }> }) {
   const [isOpen, setIsOpen] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const handleMouseEnter = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
     setIsOpen(true)
   }
-
   const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsOpen(false)
-    }, 200) // Задержка закрытия 200ms
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 200)
   }
-
   const handleLinkClick = () => {
-    // Очищаем таймер и закрываем меню при клике на ссылку
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
     setIsOpen(false)
   }
-
-  // Очищаем таймер при размонтировании
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [])
+  useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }, [])
 
   const renderIcon = (icon: string | React.ComponentType<any>) => {
-    if (typeof icon === 'string') {
-      // Если это код страны (CN, JP, KR), используем FlagIcon
-      if (['CN', 'JP', 'KR', 'US', 'RU'].includes(icon)) {
+    if (typeof icon === "string") {
+      if (["CN", "JP", "KR", "US", "RU"].includes(icon)) {
         return <FlagIcon countryCode={icon} size={16} className="flex-shrink-0" />
       }
-      // Если это эмодзи, возвращаем span с эмодзи
       return <span className="text-base flex-shrink-0">{icon}</span>
     } else {
-      // Если это компонент, рендерим его
-      const IconComponent = icon
-      return <IconComponent className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+      const Icon = icon
+      return <Icon className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
     }
   }
 
   return (
-    <div 
-      ref={menuRef}
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div ref={menuRef} className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <button
         className={cn(
           "group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-3 py-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
           isOpen && "bg-accent/50"
         )}
-        onClick={() => {
-          // Очищаем таймер при клике на кнопку
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current)
-          }
-        }}
+        onClick={() => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }}
       >
         {title}
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 15 15"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className={cn(
-            "ml-1 h-3 w-3 transition-transform duration-300",
-            isOpen && "rotate-180"
-          )}
-        >
-          <path
-            d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z"
-            fill="currentColor"
-            fillRule="evenodd"
-            clipRule="evenodd"
-          ></path>
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"
+             className={cn("ml-1 h-3 w-3 transition-transform duration-300", isOpen && "rotate-180")}>
+          <path d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z"
+                fill="currentColor" />
         </svg>
       </button>
 
       {isOpen && (
-        <div 
+        <div
           className="absolute left-0 top-full mt-1 w-64 rounded-md border bg-popover p-1 text-popover-foreground shadow-md z-50 animate-in fade-in-0 zoom-in-95"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
         >
           {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="relative flex cursor-pointer select-none items-start gap-3 rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-              onClick={handleLinkClick}
-            >
-              <div className={cn(
-                "flex items-center justify-center mt-0.5 flex-shrink-0",
-                typeof item.icon === 'string' && !['CN', 'JP', 'KR', 'US', 'RU'].includes(item.icon) ? "w-4 h-4 text-base" : "w-4 h-4"
-              )}>
+            <Link key={item.href} href={item.href}
+                  className="relative flex cursor-pointer select-none items-start gap-3 rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                  onClick={handleLinkClick}>
+              <div className={cn("flex items-center justify-center mt-0.5 flex-shrink-0",
+                                  typeof item.icon === "string" && !["CN","JP","KR","US","RU"].includes(item.icon) ? "w-4 h-4 text-base" : "w-4 h-4")}>
                 {renderIcon(item.icon)}
               </div>
               <div className="flex flex-col">
@@ -139,52 +95,29 @@ export default function Header() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // === НОВОЕ: состояние диалогов + пользователь
+  const { me, loading, setMe } = useMe()
+  const [openLogin, setOpenLogin] = useState(false)
+  const [openRegister, setOpenRegister] = useState(false)
 
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" })
+    setMe(null)
+  }
+
+  useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
   const infoMenuItems = [
-    { 
-      label: "Как заказать", 
-      href: "/howorder",
-      description: "Описание процесса заказа автомобиля",
-      icon: FileText
-    },
-    { 
-      label: "О компании", 
-      href: "/about",
-      description: "Узнайте детальнее о нашей компании",
-      icon: Building
-    },
-    { 
-      label: "Часто задаваемые вопросы", 
-      href: "/faq",
-      description: "Ответы на популярные вопросы клиентов",
-      icon: HelpCircle
-    },
+    { label: "Как заказать", href: "/howorder", description: "Описание процесса заказа автомобиля", icon: Building },
+    { label: "О компании", href: "/about", description: "Узнайте детальнее о нашей компании", icon: FileText },
+    { label: "Часто задаваемые вопросы", href: "/faq", description: "Ответы на популярные вопросы клиентов", icon: HelpCircle },
   ]
 
   const catalogMenuItems = [
-    { 
-      label: "Авто из Китая", 
-      href: "/catalog/china",
-      description: "Широкий выбор китайских автомобилей",
-      icon: "CN" // Используем код страны вместо эмодзи
-    },
-    { 
-      label: "Авто из Южной Кореи", 
-      href: "/catalog/korea",
-      description: "Качественные корейские автомобили",
-      icon: "KR" // Используем код страны вместо эмодзи
-    },
-    { 
-      label: "Авто из Японии", 
-      href: "/catalog/japan",
-      description: "Надежные японские автомобили",
-      icon: "JP" // Используем код страны вместо эмодзи
-    },
+    { label: "Авто из Китая", href: "/catalog/china", description: "Широкий выбор китайских автомобилей", icon: "CN" },
+    { label: "Авто из Южной Кореи", href: "/catalog/korea", description: "Качественные корейские автомобили", icon: "KR" },
+    { label: "Авто из Японии", href: "/catalog/japan", description: "Надежные японские автомобили", icon: "JP" },
   ]
 
   return (
@@ -194,11 +127,7 @@ export default function Header() {
         <div className="flex items-center space-x-4 md:space-x-8">
           <Link href="/" className="flex items-center flex-shrink-0">
             <Image
-              src={
-                theme === "dark"
-                  ? "/Logotype_v1_1_bt_v2.png"
-                  : "/Logotype_v1_1_lt_v2.png"
-              }
+              src={theme === "dark" ? "/Logotype_v1_1_bt_v2.png" : "/Logotype_v1_1_lt_v2.png"}
               alt="Sino Auto Import Logo"
               width={120}
               height={32}
@@ -209,13 +138,8 @@ export default function Header() {
 
           {/* Навигация — desktop */}
           <nav className="hidden xl:flex items-center space-x-1">
-            {/* Каталог авто с выпадающим меню */}
             <DropdownMenu title="Каталог авто" items={catalogMenuItems} />
-
-            {/* Информация с выпадающим меню */}
             <DropdownMenu title="Информация" items={infoMenuItems} />
-            
-            {/* Контакты */}
             <Link
               href="/#contacts"
               className="inline-flex h-9 items-center justify-center rounded-md bg-background px-3 py-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
@@ -228,12 +152,7 @@ export default function Header() {
         {/* Правая часть */}
         <div className="flex items-center space-x-3">
           {/* Кнопка звонка */}
-          <Button
-            variant="outline"
-            size="default"
-            asChild
-            className="hidden lg:flex items-center space-x-2"
-          >
+          <Button variant="outline" size="default" asChild className="hidden lg:flex items-center space-x-2">
             <a href="tel:+79996164437" aria-label="Позвонить консультанту">
               <Phone className="h-[1.2rem] w-[1.2rem]" />
               <span>Позвонить консультанту</span>
@@ -241,61 +160,44 @@ export default function Header() {
           </Button>
 
           {/* Telegram */}
-          <Button
-            variant="telegram"
-            size="icon"
-            asChild
-            className="hidden sm:flex"
-          >
-            <a
-              href="https://t.me/sinoautoimport"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Написать в Telegram"
-            >
+          <Button variant="telegram" size="icon" asChild className="hidden sm:flex">
+            <a href="https://t.me/sinoautoimport" target="_blank" rel="noopener noreferrer" aria-label="Написать в Telegram">
               <FaTelegramPlane className="h-[1.2rem] w-[1.2rem]" />
             </a>
           </Button>
 
           {/* WhatsApp */}
-          <Button
-            variant="whatsapp"
-            size="icon"
-            asChild
-            className="hidden sm:flex"
-          >
-            <a
-              href="https://wa.me/79520849778"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Написать в WhatsApp"
-            >
+          <Button variant="whatsapp" size="icon" asChild className="hidden sm:flex">
+            <a href="https://wa.me/79520849778" target="_blank" rel="noopener noreferrer" aria-label="Написать в WhatsApp">
               <FaWhatsapp className="h-[1.2rem] w-[1.2rem]" />
             </a>
           </Button>
 
           {/* Переключатель темы */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="cursor-pointer"
-          >
-            {theme === "light" ? (
-              <Moon className="h-[1.2rem] w-[1.2rem]" />
-            ) : (
-              <Sun className="h-[1.2rem] w-[1.2rem]" />
-            )}
+          <Button variant="outline" size="icon" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className="cursor-pointer">
+            {theme === "light" ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
           </Button>
+
+          {/* === НОВОЕ: Auth === */}
+          {!loading && !me && (
+            <>
+              <Button variant="outline" onClick={() => setOpenLogin(true)}>Вход</Button>
+              <Button variant="default" onClick={() => setOpenRegister(true)}>Регистрация</Button>
+            </>
+          )}
+
+          {!loading && me && (
+            <div className="flex items-center gap-3">
+              {me.role === "ADMIN" && <Link className="underline" href="/admin">Админка</Link>}
+              <span className="text-sm opacity-80">{me.email}</span>
+              <Button variant="outline" onClick={logout}>Выйти</Button>
+            </div>
+          )}
 
           {/* Мобильное меню */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="flex xl:hidden"
-              >
+              <Button variant="outline" size="icon" className="flex xl:hidden">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -309,38 +211,23 @@ export default function Header() {
               <nav className="flex flex-col space-y-3 text-base">
                 <div className="font-semibold text-muted-foreground mb-2">Каталог авто</div>
                 {catalogMenuItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="hover:text-primary transition-colors pl-4 flex items-center gap-2"
-                  >
-                    {/* Используем FlagIcon в мобильном меню */}
-                    <FlagIcon 
-                      countryCode={typeof item.icon === 'string' ? item.icon : ''} 
-                      size={16} 
-                    />
+                  <Link key={item.href} href={item.href} className="hover:text-primary transition-colors pl-4 flex items-center gap-2">
+                    <FlagIcon countryCode={typeof item.icon === "string" ? item.icon : ""} size={16} />
                     {item.label}
                   </Link>
                 ))}
-                
+
                 <div className="border-t border-border/40 pt-3 mt-2">
                   <div className="font-semibold text-muted-foreground mb-2">Информация</div>
                   {infoMenuItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="hover:text-primary transition-colors pl-4 block py-1"
-                    >
+                    <Link key={item.href} href={item.href} className="hover:text-primary transition-colors pl-4 block py-1">
                       {item.label}
                     </Link>
                   ))}
                 </div>
 
                 <div className="border-t border-border/40 pt-3 mt-2">
-                  <Link
-                    href="/#contacts"
-                    className="hover:text-primary transition-colors block py-2"
-                  >
+                  <Link href="/#contacts" className="hover:text-primary transition-colors block py-2">
                     Контакты
                   </Link>
                 </div>
@@ -349,6 +236,21 @@ export default function Header() {
           </Sheet>
         </div>
       </div>
+
+      {/* Диалоги авторизации */}
+      <Dialog open={openLogin} onOpenChange={setOpenLogin}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader><DialogTitle>Вход</DialogTitle></DialogHeader>
+          <LoginForm onDoneAction={() => setOpenLogin(false)} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openRegister} onOpenChange={setOpenRegister}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader><DialogTitle>Регистрация</DialogTitle></DialogHeader>
+          <RegisterForm onDoneAction={() => setOpenRegister(false)} />
+        </DialogContent>
+      </Dialog>
     </header>
   )
 }
