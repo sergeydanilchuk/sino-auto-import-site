@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { createSession, COOKIE_NAME } from '@/lib/auth';
+export const runtime = 'nodejs';
 
 const schema = z.object({
   email: z.string().email(),
