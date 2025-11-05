@@ -43,62 +43,106 @@ export default function VideoSection({
       ref={sectionRef}
       className="py-20 border-t border-border/40 bg-background"
     >
-      <div className="container mx-auto px-12">
+      <div className="container mx-auto px-4 sm:px-12">
         {/* Заголовок */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={allVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold mb-2 text-left"
-        >
-          {title}
-        </motion.h2>
-
-        {description && (
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={allVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-muted-foreground mb-12 text-left max-w-2xl"
-          >
-            {description}
-          </motion.p>
-        )}
+        <div className="text-left mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-2">
+            {title}
+          </h2>
+          {description && (
+            <p className="text-muted-foreground max-w-2xl">
+              {description}
+            </p>
+          )}
+        </div>
 
         {/* Сетка видео */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Главное видео */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={allVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="w-full h-full"
-          >
+          <div className="w-full h-full">
             <LazyVKVideo
               src={mainVideo}
               className="rounded-2xl overflow-hidden shadow-md h-full"
               fullHeight
             />
-          </motion.div>
+          </div>
 
-          {/* Маленькие видео */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={allVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full"
-          >
-            {videos.map((url, index) => (
-              <LazyVKVideo
-                key={index}
-                src={url}
-                className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
-              />
-            ))}
-          </motion.div>
+          {/* Маленькие видео - на мобильных горизонтальный скролл */}
+          <div className="h-full">
+            {/* Десктопная версия */}
+            <div className="hidden sm:grid sm:grid-cols-2 gap-6 h-full">
+              {videos.map((url, index) => (
+                <LazyVKVideo
+                  key={index}
+                  src={url}
+                  className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
+                />
+              ))}
+            </div>
+
+            {/* Мобильная версия с горизонтальным скроллом */}
+            <div className="sm:hidden">
+              <HorizontalVideoScroll videos={videos} />
+            </div>
+          </div>
         </div>
       </div>
     </section>
+  );
+}
+
+/* ======================================
+   Горизонтальный скролл для мобильных
+====================================== */
+function HorizontalVideoScroll({ videos }: { videos: string[] }) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollContainerRef}
+        className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-hide"
+        style={{
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {videos.map((url, index) => (
+          <div
+            key={index}
+            className="flex-shrink-0 w-[85vw] max-w-[320px]"
+            style={{
+              scrollSnapAlign: 'start',
+            }}
+          >
+            <LazyVKVideo
+              src={url}
+              className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Индикатор скролла */}
+      <div className="flex justify-center mt-4 gap-1">
+        {videos.map((_, index) => (
+          <div
+            key={index}
+            className="w-2 h-2 rounded-full bg-muted-foreground/30"
+          />
+        ))}
+      </div>
+
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+    </div>
   );
 }
 

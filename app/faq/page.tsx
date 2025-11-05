@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { ChevronDown, Info } from "lucide-react"
 import { faqData } from "@/data/faqData"
 import { cn } from "@/lib/utils/utils"
-import HomePageButton from "@/components/HomePageButton"
+import Breadcrumbs from "@/components/Breadcrumbs"
 
 export default function FaqPage() {
   const categories = Object.keys(faqData).sort((a, b) => a.localeCompare(b, "ru"))
@@ -22,18 +22,14 @@ export default function FaqPage() {
 
   return (
     <section className="py-16 bg-muted/30 border-t border-border/40">
+      <Breadcrumbs />
       <div className="container mx-auto px-12">
         {/* Заголовок и кнопка справа */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-12">
           <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-3xl md:text-4xl font-bold mb-2 text-left"
-            >
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-left">
               Часто задаваемые вопросы
-            </motion.h1>
+            </h1>
 
             <p className="text-muted-foreground text-left max-w-2xl">
               Найдите ответы на вопросы о покупке, доставке и оформлении автомобилей.
@@ -42,7 +38,6 @@ export default function FaqPage() {
 
           {/* Кнопка справа, выровненная по верхнему краю */}
           <div className="flex flex-wrap gap-4 self-start">
-            <HomePageButton />
           </div>
         </div>
 
@@ -69,14 +64,12 @@ export default function FaqPage() {
                       filteredCategories.map((cat) => {
                         const isActive = currentTab === cat
                         return (
-                          <motion.button
+                          <button
                             key={cat}
                             onClick={() => {
                               setCurrentTab(cat)
                               setOpenItem(null)
                             }}
-                            whileTap={{ scale: 0.99 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
                             className={cn(
                               "w-full text-left px-3 py-2 rounded-md text-sm md:text-base font-medium cursor-pointer select-none",
                               "transition-colors duration-200",
@@ -86,7 +79,7 @@ export default function FaqPage() {
                             )}
                           >
                             {cat}
-                          </motion.button>
+                          </button>
                         )
                       })
                     ) : (
@@ -109,22 +102,12 @@ export default function FaqPage() {
 
                     return (
                       <TabsContent key={cat} value={cat} className="w-full">
-                        <motion.h2
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.4 }}
-                          className="text-2xl font-semibold mb-6 border-b border-border/40 pb-2"
-                        >
+                        <h2 className="text-2xl font-semibold mb-6 border-b border-border/40 pb-2">
                           {cat}
-                        </motion.h2>
+                        </h2>
 
                         {isEmpty ? (
-                          <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="flex flex-col items-center justify-center text-center py-16 border border-dashed border-border/40 rounded-xl bg-background/50"
-                          >
+                          <div className="flex flex-col items-center justify-center text-center py-16 border border-dashed border-border/40 rounded-xl bg-background/50">
                             <Info className="w-10 h-10 text-muted-foreground mb-3" />
                             <h3 className="text-lg font-semibold mb-1">
                               Мы ещё работаем над этой категорией
@@ -132,7 +115,7 @@ export default function FaqPage() {
                             <p className="text-muted-foreground text-sm max-w-md">
                               Совсем скоро здесь появятся ответы на популярные вопросы по этой теме.
                             </p>
-                          </motion.div>
+                          </div>
                         ) : (
                           <div className="space-y-3">
                             {validItems.map((item, index) => {
@@ -140,10 +123,9 @@ export default function FaqPage() {
                               const isOpen = openItem === value
 
                               return (
-                                <motion.div
+                                <div
                                   key={index}
                                   className="border border-border/40 rounded-lg bg-background/70 hover:bg-background/90 transition-colors"
-                                  layout
                                 >
                                   <button
                                     onClick={() =>
@@ -152,12 +134,12 @@ export default function FaqPage() {
                                     className="flex justify-between items-center w-full text-left font-medium text-base md:text-lg py-3 px-4"
                                   >
                                     {item.q}
-                                    <motion.div
-                                      animate={{ rotate: isOpen ? 180 : 0 }}
-                                      transition={{ duration: 0.25 }}
+                                    <div
+                                      style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                                      className="transition-transform duration-250"
                                     >
                                       <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                                    </motion.div>
+                                    </div>
                                   </button>
 
                                   <AnimatePresence initial={false}>
@@ -179,7 +161,7 @@ export default function FaqPage() {
                                       </motion.div>
                                     )}
                                   </AnimatePresence>
-                                </motion.div>
+                                </div>
                               )
                             })}
                           </div>

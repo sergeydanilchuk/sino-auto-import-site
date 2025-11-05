@@ -16,15 +16,9 @@ export default function FaqSection() {
 
   return (
     <section className="py-16 bg-muted/30 border-t border-border/40">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-12">
         {/* Заголовок + кнопка справа */}
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left"
-        >
+        <div className="mb-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold mb-2">
               Часто задаваемые вопросы
@@ -41,7 +35,7 @@ export default function FaqSection() {
             <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>
-        </motion.div>
+        </div>
 
         {/* Две независимые колонки */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">

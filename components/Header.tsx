@@ -3,13 +3,137 @@
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Moon, Sun, Phone, Menu } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Moon, Sun, Phone, Menu, FileText, Building, HelpCircle } from "lucide-react"
+import { useEffect, useState, useRef } from "react"
 import Image from "next/image"
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa"
 import { DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import { cn } from "@/lib/utils/utils"
+import FlagIcon from "@/components/FlagIcon" // Импортируем компонент флагов
+
+// Кастомный компонент для выпадающего меню с задержкой закрытия
+function DropdownMenu({ title, items }: { title: string; items: Array<{ label: string; href: string; description: string; icon: string | React.ComponentType<any> }> }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    setIsOpen(true)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false)
+    }, 200) // Задержка закрытия 200ms
+  }
+
+  const handleLinkClick = () => {
+    // Очищаем таймер и закрываем меню при клике на ссылку
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    setIsOpen(false)
+  }
+
+  // Очищаем таймер при размонтировании
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
+  const renderIcon = (icon: string | React.ComponentType<any>) => {
+    if (typeof icon === 'string') {
+      // Если это код страны (CN, JP, KR), используем FlagIcon
+      if (['CN', 'JP', 'KR', 'US', 'RU'].includes(icon)) {
+        return <FlagIcon countryCode={icon} size={16} className="flex-shrink-0" />
+      }
+      // Если это эмодзи, возвращаем span с эмодзи
+      return <span className="text-base flex-shrink-0">{icon}</span>
+    } else {
+      // Если это компонент, рендерим его
+      const IconComponent = icon
+      return <IconComponent className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+    }
+  }
+
+  return (
+    <div 
+      ref={menuRef}
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        className={cn(
+          "group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-3 py-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+          isOpen && "bg-accent/50"
+        )}
+        onClick={() => {
+          // Очищаем таймер при клике на кнопку
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current)
+          }
+        }}
+      >
+        {title}
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 15 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={cn(
+            "ml-1 h-3 w-3 transition-transform duration-300",
+            isOpen && "rotate-180"
+          )}
+        >
+          <path
+            d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z"
+            fill="currentColor"
+            fillRule="evenodd"
+            clipRule="evenodd"
+          ></path>
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div 
+          className="absolute left-0 top-full mt-1 w-64 rounded-md border bg-popover p-1 text-popover-foreground shadow-md z-50 animate-in fade-in-0 zoom-in-95"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          {items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="relative flex cursor-pointer select-none items-start gap-3 rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+              onClick={handleLinkClick}
+            >
+              <div className={cn(
+                "flex items-center justify-center mt-0.5 flex-shrink-0",
+                typeof item.icon === 'string' && !['CN', 'JP', 'KR', 'US', 'RU'].includes(item.icon) ? "w-4 h-4 text-base" : "w-4 h-4"
+              )}>
+                {renderIcon(item.icon)}
+              </div>
+              <div className="flex flex-col">
+                <div className="font-medium">{item.label}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{item.description}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
@@ -21,8 +145,50 @@ export default function Header() {
 
   if (!mounted) return null
 
+  const infoMenuItems = [
+    { 
+      label: "Как заказать", 
+      href: "/howorder",
+      description: "Описание процесса заказа автомобиля",
+      icon: FileText
+    },
+    { 
+      label: "О компании", 
+      href: "/about",
+      description: "Узнайте детальнее о нашей компании",
+      icon: Building
+    },
+    { 
+      label: "Часто задаваемые вопросы", 
+      href: "/faq",
+      description: "Ответы на популярные вопросы клиентов",
+      icon: HelpCircle
+    },
+  ]
+
+  const catalogMenuItems = [
+    { 
+      label: "Авто из Китая", 
+      href: "/catalog/china",
+      description: "Широкий выбор китайских автомобилей",
+      icon: "CN" // Используем код страны вместо эмодзи
+    },
+    { 
+      label: "Авто из Южной Кореи", 
+      href: "/catalog/korea",
+      description: "Качественные корейские автомобили",
+      icon: "KR" // Используем код страны вместо эмодзи
+    },
+    { 
+      label: "Авто из Японии", 
+      href: "/catalog/japan",
+      description: "Надежные японские автомобили",
+      icon: "JP" // Используем код страны вместо эмодзи
+    },
+  ]
+
   return (
-    <header className="w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-40">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-12">
         {/* Левая часть: логотип + меню */}
         <div className="flex items-center space-x-4 md:space-x-8">
@@ -42,22 +208,20 @@ export default function Header() {
           </Link>
 
           {/* Навигация — desktop */}
-          <nav className="hidden xl:flex items-center space-x-4 text-sm font-medium">
-            {[
-              { label: "Как заказать", href: "/info/howorder" },
-              { label: "Каталог авто", href: "/catalog" },
-              { label: "О компании", href: "/info/about" },
-              { label: "Контакты", href: "/#contacts" },
-            ].map((item) => (
-              <Button
-                key={item.href}
-                asChild
-                variant="ghost"
-                className="transition-colors duration-300 hover:text-primary font-normal"
-              >
-                <Link href={item.href}>{item.label}</Link>
-              </Button>
-            ))}
+          <nav className="hidden xl:flex items-center space-x-1">
+            {/* Каталог авто с выпадающим меню */}
+            <DropdownMenu title="Каталог авто" items={catalogMenuItems} />
+
+            {/* Информация с выпадающим меню */}
+            <DropdownMenu title="Информация" items={infoMenuItems} />
+            
+            {/* Контакты */}
+            <Link
+              href="/#contacts"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-background px-3 py-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+            >
+              Контакты
+            </Link>
           </nav>
         </div>
 
@@ -143,20 +307,43 @@ export default function Header() {
               </DialogTitle>
 
               <nav className="flex flex-col space-y-3 text-base">
-                {[
-                  { label: "Как заказать", href: "/howorder" },
-                  { label: "Каталог авто", href: "/catalog" },
-                  { label: "О компании", href: "/about" },
-                  { label: "Контакты", href: "/#contacts" },
-                ].map((item) => (
+                <div className="font-semibold text-muted-foreground mb-2">Каталог авто</div>
+                {catalogMenuItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="hover:text-primary transition-colors"
+                    className="hover:text-primary transition-colors pl-4 flex items-center gap-2"
                   >
+                    {/* Используем FlagIcon в мобильном меню */}
+                    <FlagIcon 
+                      countryCode={typeof item.icon === 'string' ? item.icon : ''} 
+                      size={16} 
+                    />
                     {item.label}
                   </Link>
                 ))}
+                
+                <div className="border-t border-border/40 pt-3 mt-2">
+                  <div className="font-semibold text-muted-foreground mb-2">Информация</div>
+                  {infoMenuItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="hover:text-primary transition-colors pl-4 block py-1"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="border-t border-border/40 pt-3 mt-2">
+                  <Link
+                    href="/#contacts"
+                    className="hover:text-primary transition-colors block py-2"
+                  >
+                    Контакты
+                  </Link>
+                </div>
               </nav>
             </SheetContent>
           </Sheet>

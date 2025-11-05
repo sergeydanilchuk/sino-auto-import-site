@@ -1,46 +1,30 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Car, FileText } from "lucide-react"
-import HomePageButton from "@/components/HomePageButton"
 import PopupForm from "@/components/PopupForm"
-import Link from "next/link"
+import Breadcrumbs from "@/components/Breadcrumbs"
 
 export default function HowOrderPage() {
   return (
     <section className="py-16 border-t border-border/40 bg-muted/40">
+      <Breadcrumbs />
       <div className="container mx-auto px-12">
         {/* Заголовок и кнопка справа */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-12">
           <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-3xl md:text-4xl font-bold mb-2 text-left"
-            >
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-left">
               Как заказать?
-            </motion.h1>
+            </h1>
 
             <p className="text-muted-foreground text-left max-w-2xl">
               Подробная инструкция по оформлению заказа автомобиля с заводов и аукционов Китая, Кореи и Японии — просто, безопасно и под полным сопровождением.
             </p>
           </div>
-
-          {/* Кнопка справа */}
-          <div className="flex flex-wrap gap-4 self-start">
-            <HomePageButton />
-          </div>
         </div>
 
         {/* Основной текст инструкции */}
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto bg-md:w-3/4 w-full p-6 md:p-10 bg-muted/40/40 backdrop-blur-sm border border-border/50 ring-1 ring-border/30 rounded-2xl p-8 leading-relaxed text-base md:text-lg"
-        >
+        <div className="mx-auto bg-md:w-3/4 w-full p-6 md:p-10 bg-muted/40 backdrop-blur-sm border border-border/50 ring-1 ring-border/30 rounded-2xl leading-relaxed text-base md:text-lg">
           <h2 className="text-2xl font-semibold mb-6 text-foreground">
             Пошаговая инструкция по заказу автомобиля
           </h2>
@@ -154,7 +138,7 @@ export default function HowOrderPage() {
               Пример договора
             </Button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

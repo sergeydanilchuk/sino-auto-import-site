@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -11,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Car, ShieldCheck, Globe, Wallet, FileText, ChevronDown, Quote, Phone } from "lucide-react"
@@ -26,50 +24,30 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Секция с картинкой и главным текстом */}
       <section className="relative flex flex-col items-center justify-center text-center py-24 md:py-40 px-12 overflow-hidden">
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
-        >
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
           Автомобили из{" "}
           <span className="text-primary">Китая</span>,{" "}
           <span className="text-primary">Южной Кореи</span> и{" "}
           <span className="text-primary">Японии</span>
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="text-muted-foreground max-w-2xl mb-8"
-        >
+        </h1>
+        <p className="text-muted-foreground max-w-2xl mb-8">
           Полный цикл импорта: от подбора и проверки до доставки и растаможки. 
           Прозрачные условия и персональный менеджер.
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="flex flex-wrap gap-4 justify-center"
-        >
+        </p>
+        <div className="flex flex-wrap gap-4 justify-center">
           <Button asChild variant="outline">
             <Link href="/how">Подробнее о процессе</Link>
           </Button>
-        </motion.div>
+        </div>
         <div className="absolute inset-0 -z-10 opacity-[0.08] bg-[url('/cars-bg.jpg')] bg-cover bg-center" />
       </section>
 
       {/* Почему выбирают нас? */}
       <section className="py-16 border-t border-border/40">
         <div className="container mx-auto px-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold mb-2 text-left"
-          >
+          <h2 className="text-3xl md:text-4xl font-bold mb-2 text-left">
             Почему выбирают нас?
-          </motion.h2>
+          </h2>
 
           <p className="text-muted-foreground mb-12 text-left max-w-2xl">
             Мы сопровождаем клиента на каждом этапе — от выбора до получения ключей.
@@ -116,14 +94,9 @@ export default function HomePage() {
       {/* Клиенты */}
       <section className="py-16 border-t border-border/40">
         <div className="container mx-auto px-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold mb-2 text-left"
-          >
+          <h2 className="text-3xl md:text-4xl font-bold mb-2 text-left">
             Довольные клиенты
-          </motion.h2>
+          </h2>
 
           <p className="text-muted-foreground mb-12 text-left max-w-2xl">
             Каждый день мы помогаем людям по всей России получить свой автомобиль из Китая, Южной Кореи и Японии.
@@ -200,12 +173,7 @@ export default function HomePage() {
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {clients.map((client, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                  >
+                  <div key={index}>
                     <Dialog>
                       <DialogTrigger asChild>
                         <Card className="overflow-hidden hover:shadow-lg transition-all h-full flex flex-col cursor-pointer">
@@ -234,48 +202,43 @@ export default function HomePage() {
                         </Card>
                       </DialogTrigger>
 
-                      {/* ✅ Модалка адаптирована и кнопка перенесена ниже отзыва */}
                       <DialogContent className="max-w-[95vw] sm:max-w-3xl w-full p-4 sm:p-6 rounded-xl">
-                      {/* Фото клиента */}
-                      <div className="w-full aspect-video overflow-hidden rounded-md">
-                        <img
-                          src={`/clients/${client.img}`}
-                          alt={`Клиент ${client.name}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                        <div className="w-full aspect-video overflow-hidden rounded-md">
+                          <img
+                            src={`/clients/${client.img}`}
+                            alt={`Клиент ${client.name}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
 
-                      {/* Заголовок */}
-                      <DialogHeader className="mt-3 text-center sm:text-left space-y-1">
-                        <DialogTitle className="text-lg sm:text-xl font-semibold">
-                          {client.name} — {client.car}
-                        </DialogTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {client.city}, {client.year}
-                        </p>
-                      </DialogHeader>
+                        <DialogHeader className="mt-3 text-center sm:text-left space-y-1">
+                          <DialogTitle className="text-lg sm:text-xl font-semibold">
+                            {client.name} — {client.car}
+                          </DialogTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {client.city}, {client.year}
+                          </p>
+                        </DialogHeader>
 
-                      {/* Отзыв (с двумя кавычками и чуть темнее фоном) */}
-                      <div className="mt-4 mb-5 bg-muted/60 p-5 rounded-lg border border-border relative">
-                        <Quote className="absolute -top-3 -left-2 w-6 h-6 text-muted-foreground/50" />
-                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-center sm:text-left italic">
-                          “{client.review}”
-                        </p>
-                        <Quote className="absolute -bottom-3 -right-2 w-6 h-6 text-muted-foreground/50 rotate-180" />
-                      </div>
+                        <div className="mt-4 mb-5 bg-muted/60 p-5 rounded-lg border border-border relative">
+                          <Quote className="absolute -top-3 -left-2 w-6 h-6 text-muted-foreground/50" />
+                          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-center sm:text-left italic">
+                            “{client.review}”
+                          </p>
+                          <Quote className="absolute -bottom-3 -right-2 w-6 h-6 text-muted-foreground/50 rotate-180" />
+                        </div>
 
-                      {/* Кнопка */}
-                      <div className="flex justify-center sm:justify-start">
-                        <PopupForm>
-                          <Button className="gap-2 cursor-pointer">
-                            <ChevronDown className="w-4 h-4" />
-                            Подобрать похожий авто
-                          </Button>
-                        </PopupForm>
-                      </div>
-                    </DialogContent>
+                        <div className="flex justify-center sm:justify-start">
+                          <PopupForm>
+                            <Button className="gap-2 cursor-pointer">
+                              <ChevronDown className="w-4 h-4" />
+                              Подобрать похожий авто
+                            </Button>
+                          </PopupForm>
+                        </div>
+                      </DialogContent>
                     </Dialog>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             );
@@ -286,24 +249,17 @@ export default function HomePage() {
       {/* Этапы работы */}
       <section className="py-16 border-t border-border/40">
         <div className="container mx-auto px-12">
-          {/* Заголовок и кнопки справа */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-12">
             <div>
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-3xl md:text-4xl font-bold mb-2 text-left"
-              >
+              <h2 className="text-3xl md:text-4xl font-bold mb-2 text-left">
                 Поэтапная схема работы
-              </motion.h2>
+              </h2>
 
               <p className="text-muted-foreground text-left max-w-2xl">
                 Всё просто и прозрачно — от заявки до получения автомобиля.
               </p>
             </div>
 
-            {/* Кнопки справа от заголовка */}
             <div className="flex flex-wrap gap-4 self-start md:self-auto">
               <PopupForm>
                 <Button className="gap-2 cursor-pointer">
@@ -386,22 +342,15 @@ export default function HomePage() {
       {/* Контакты */}
       <section id="contacts" className="py-20 border-t border-border/40 bg-muted/30">
         <div className="container mx-auto px-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold mb-2 text-left"
-          >
+          <h2 className="text-3xl md:text-4xl font-bold mb-2 text-left">
             Контакты
-          </motion.h2>
+          </h2>
 
           <p className="text-muted-foreground mb-12 text-left max-w-2xl">
             Оставьте заявку или напишите нам удобным способом — мы ответим в течение 15 минут.
           </p>
 
-          {/* Карточки контактов */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Телефон */}
             <Card className="p-6 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all">
               <Phone className="w-8 h-8 text-primary mb-3" />
               <h3 className="font-semibold text-lg mb-1">Телефон</h3>
@@ -413,7 +362,6 @@ export default function HomePage() {
               </p>
             </Card>
 
-            {/* Telegram */}
             <Card className="p-6 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all">
               <FaTelegramPlane className="w-8 h-8 text-primary mb-3" />
               <h3 className="font-semibold text-lg mb-1">Telegram</h3>
@@ -430,7 +378,6 @@ export default function HomePage() {
               </p>
             </Card>
 
-            {/* WhatsApp */}
             <Card className="p-6 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all">
               <FaWhatsapp className="w-8 h-8 text-primary mb-3" />
               <h3 className="font-semibold text-lg mb-1">WhatsApp</h3>
@@ -448,26 +395,18 @@ export default function HomePage() {
             </Card>
           </div>
 
-          {/* Карта и адрес */}
           <div className="mt-20">
             <h3 className="text-2xl font-semibold mb-3 text-left">Наш офис</h3>
             <p className="text-muted-foreground mb-8 text-left">
               Шоссейный переулок, 2, Артём, Приморский край
             </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="rounded-2xl overflow-hidden border border-border/40 shadow-sm bg-background"
-            >
+            <div className="rounded-2xl overflow-hidden border border-border/40 shadow-sm bg-background">
               <YandexMap />
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
-
     </div>
   )
 }

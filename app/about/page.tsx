@@ -1,41 +1,28 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Award, Users, Globe } from "lucide-react"
-import HomePageButton from "@/components/HomePageButton" // ✅ подключаем компонент кнопок
+import Breadcrumbs from "@/components/Breadcrumbs"
 
 export default function AboutPage() {
   return (
     <section className="py-16 border-t border-border/40 bg-muted/40">
+      <Breadcrumbs />
       <div className="container mx-auto px-12">
         {/* Заголовок и кнопки справа */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-12">
           <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-3xl md:text-4xl font-bold mb-2 text-left"
-            >
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-left">
               О компании Sino Auto Import
-            </motion.h1>
+            </h1>
 
             <p className="text-muted-foreground text-left max-w-2xl">
               Мы занимаемся поставкой автомобилей из стран Азии под ключ, обеспечивая прозрачность, безопасность и гарантированное качество на каждом этапе.
             </p>
           </div>
-
-          {/* ✅ Здесь просто вызываем компонент кнопок */}
-          <HomePageButton />
         </div>
 
         {/* Основной контент */}
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full p-6 md:p-10 bg-muted/40 backdrop-blur-sm border border-border/50 ring-1 ring-border/30 rounded-2xl leading-relaxed text-base md:text-lg"
-        >
+        <div className="w-full p-6 md:p-10 bg-muted/40 backdrop-blur-sm border border-border/50 ring-1 ring-border/30 rounded-2xl leading-relaxed text-base md:text-lg">
           <h2 className="text-2xl font-semibold mb-6 text-foreground">
             Кто мы и чем отличаемся
           </h2>
@@ -96,7 +83,7 @@ export default function AboutPage() {
             "Сино Авто Импорт" — это надёжный партнёр, который сопровождает
             вас от первой консультации до получения автомобиля.
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   )
