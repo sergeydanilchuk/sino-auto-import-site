@@ -40,3 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 public/flags/*.exe
+
+/lib/generated/prisma
