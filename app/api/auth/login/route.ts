@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, COOKIE_NAME } from '@/lib/auth';
-export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
