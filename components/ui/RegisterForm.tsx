@@ -116,7 +116,7 @@ export default function RegisterForm({ onDoneAction }: Props) {
       if (!name.trim()) {
         description = "Введите имя";
       } else if (!isEmail) {
-        description = "Некорректный email";
+        description = "Некорректный e-mail";
       } else if (password.length < 6) {
         description = "Пароль должен содержать минимум 6 символов.";
       } else if (/[А-Яа-яЁё]/.test(password)) {
