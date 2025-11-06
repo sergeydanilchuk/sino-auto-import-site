@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { COOKIE_NAME } from '@/lib/auth';
 export const runtime = 'nodejs';
