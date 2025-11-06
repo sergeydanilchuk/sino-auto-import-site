@@ -1,5 +1,11 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs"
+  "functions": {
+
+    "app/**/route.{js,ts}": {
+      "includeFiles": "node_modules/.prisma/client/**"
+    },
+    "api/**/*.{js,ts}": {
+      "includeFiles": "node_modules/.prisma/client/**"
+    }
+  }
 }
