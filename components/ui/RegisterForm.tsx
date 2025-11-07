@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import Turnstile from "@marsidev/react-turnstile"; // 👈 добавлено
+import { Turnstile } from "@marsidev/react-turnstile";
 
 type Props = { onDoneAction?: () => void };
 
