@@ -63,8 +63,5 @@
     "prisma": "^6.18.0",
     "tailwindcss": "^4.1.16",
     "typescript": "^5"
-  },
-  "prisma": {
-    "engineType": "binary"
   }
 }
