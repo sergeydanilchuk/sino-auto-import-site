@@ -119,11 +119,10 @@ export default function Header() {
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" })
 
-    // мгновенно переключаем UI (обнулим кэш /api/auth/me)
     await mutate({ user: null }, { revalidate: false })
 
-    r.refresh()          // пересоберём серверные компоненты/шапку
-    notifyAuth("logout") // сообщим другим вкладкам
+    r.refresh()
+    notifyAuth("logout")
   }
 
   useEffect(() => { setMounted(true) }, [])
