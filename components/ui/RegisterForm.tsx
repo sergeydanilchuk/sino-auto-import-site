@@ -293,10 +293,11 @@ export default function RegisterForm({ onDoneAction }: Props) {
           <div className="mt-1">
             <Turnstile
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-              onSuccess={(t) => setCaptchaToken(t)}
-              onExpire={() => setCaptchaToken("")}
-              onError={() => setCaptchaToken("")}
+              onSuccess={(t)=>setCaptchaToken(t)}
+              onExpire={()=>setCaptchaToken("")}
+              onError={()=>setCaptchaToken("")}
             />
+
           </div>
 
           {err && <p className="text-sm text-red-600">{err}</p>}
