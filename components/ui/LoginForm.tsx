@@ -8,11 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMe } from "@/lib/useMe";
+import { notifyAuth } from "@/lib/authBus";
 
 type Props = { onDoneAction?: () => void };
 
 export default function LoginForm({ onDoneAction }: Props) {
   const r = useRouter();
+  const { mutate } = useMe();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
@@ -56,9 +60,13 @@ export default function LoginForm({ onDoneAction }: Props) {
         return;
       }
 
+      await mutate();
+      r.refresh();
+      notifyAuth("login");
+
       toast.success("Вы вошли в аккаунт");
-      onDoneAction?.(); // закрыть поп-ап
-      r.refresh();      // обновить шапку (email/выход/админка)
+      onDoneAction?.();
+      setPassword("");
     } catch {
       setErr("Сеть недоступна. Повторите попытку позже.");
       toast.warning("Проблема с сетью");
@@ -98,7 +106,7 @@ export default function LoginForm({ onDoneAction }: Props) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="pr-10"  // запас справа под иконку-глаз
+                className="pr-10"
               />
               <button
                 type="button"
@@ -122,13 +130,10 @@ export default function LoginForm({ onDoneAction }: Props) {
             {loading ? "Выполняем вход..." : "Войти"}
           </Button>
 
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-center text-sm">
             <a href="/forgot" className="underline underline-offset-4">
               Забыли пароль?
             </a>
-            <span className="text-muted-foreground">
-              Нет аккаунта? <a href="/register" className="underline">Регистрация</a>
-            </span>
           </div>
         </motion.div>
       </AnimatePresence>

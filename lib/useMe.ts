@@ -1,26 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
+
+type Me = {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: "USER" | "ADMIN";
+  avatarUrl?: string | null;
+};
+
+const fetcher = (url: string) =>
+  fetch(url, { credentials: "include" }).then((res) => res.json());
 
 export function useMe() {
-  const [me, setMe] = useState<null | { id: string; email: string; role: "USER" | "ADMIN" }>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, mutate } = useSWR<{ user: Me | null }>(
+    "/api/auth/me",
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/auth/me", { cache: "no-store" });
-        const data = await res.json();
-        if (active) setMe(data.user ?? null);
-      } catch {
-        if (active) setMe(null);
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => { active = false; };
-  }, []);
-
-  return { me, loading, setMe };
+  return {
+    me: data?.user ?? null,
+    loading: isLoading,
+    setMe: (next: Me | null) => mutate({ user: next }, { revalidate: false }),
+    mutate,
+  };
 }
