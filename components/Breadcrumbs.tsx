@@ -11,7 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { cn } from "@/lib/utils/utils"
+import { cn } from "@/lib/utils"
 
 // Карта путей для реальных страниц
 const pathMap: Record<string, string> = {

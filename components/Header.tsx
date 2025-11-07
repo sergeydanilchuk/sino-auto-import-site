@@ -3,38 +3,46 @@
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Moon, Sun, Phone, Menu, FileText, Building, HelpCircle } from "lucide-react"
+import { Moon, Sun, Phone, Menu, FileText, Building, HelpCircle, UserRound } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
 import Image from "next/image"
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
-import { cn } from "@/lib/utils/utils"
+import { cn } from "@/lib/utils"
 import FlagIcon from "@/components/FlagIcon"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu"
 
-// === НОВОЕ: формы и хук пользователя
 import LoginForm from "@/components/ui/LoginForm"
 import RegisterForm from "@/components/ui/RegisterForm"
 import { useMe } from "@/lib/useMe"
+import { useRouter } from "next/navigation"
+import { notifyAuth } from "@/lib/authBus"
 
-// Кастомный компонент выпадающего меню
-function DropdownMenu({ title, items }: { title: string; items: Array<{ label: string; href: string; description: string; icon: string | React.ComponentType<any> }> }) {
+function DropdownMenuNav({
+  title,
+  items,
+}: {
+  title: string
+  items: Array<{ label: string; href: string; description: string; icon: string | React.ComponentType<any> }>
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    setIsOpen(true)
-  }
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 200)
-  }
-  const handleLinkClick = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    setIsOpen(false)
-  }
+  const handleMouseEnter = () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); setIsOpen(true) }
+  const handleMouseLeave = () => { timeoutRef.current = setTimeout(() => setIsOpen(false), 200) }
+  const handleLinkClick = () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); setIsOpen(false) }
   useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }, [])
 
   const renderIcon = (icon: string | React.ComponentType<any>) => {
@@ -91,18 +99,31 @@ function DropdownMenu({ title, items }: { title: string; items: Array<{ label: s
   )
 }
 
+function getInitials(name?: string, email?: string) {
+  const base = (name && name.trim()) || email || ""
+  const parts = base.replace(/<.*?>/g, "").split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return "U"
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
+}
+
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // === НОВОЕ: состояние диалогов + пользователь
-  const { me, loading, setMe } = useMe()
-  const [openLogin, setOpenLogin] = useState(false)
-  const [openRegister, setOpenRegister] = useState(false)
+  const { me, loading, mutate } = useMe()
+  const [openAuth, setOpenAuth] = useState(false)
+  const [authTab, setAuthTab] = useState<"login" | "register">("login")
+  const r = useRouter()
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" })
-    setMe(null)
+
+    // мгновенно переключаем UI (обнулим кэш /api/auth/me)
+    await mutate({ user: null }, { revalidate: false })
+
+    r.refresh()          // пересоберём серверные компоненты/шапку
+    notifyAuth("logout") // сообщим другим вкладкам
   }
 
   useEffect(() => { setMounted(true) }, [])
@@ -138,8 +159,8 @@ export default function Header() {
 
           {/* Навигация — desktop */}
           <nav className="hidden xl:flex items-center space-x-1">
-            <DropdownMenu title="Каталог авто" items={catalogMenuItems} />
-            <DropdownMenu title="Информация" items={infoMenuItems} />
+            <DropdownMenuNav title="Каталог авто" items={catalogMenuItems} />
+            <DropdownMenuNav title="Информация" items={infoMenuItems} />
             <Link
               href="/#contacts"
               className="inline-flex h-9 items-center justify-center rounded-md bg-background px-3 py-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
@@ -151,11 +172,62 @@ export default function Header() {
 
         {/* Правая часть */}
         <div className="flex items-center space-x-3">
+          {!loading && !me && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Войти или зарегистрироваться"
+              onClick={() => { setAuthTab("login"); setOpenAuth(true); }}
+              className="cursor-pointer"
+            >
+              <UserRound className="h-5 w-5" />
+            </Button>
+          )}
+
+          {!loading && me && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="group inline-flex items-center gap-2 rounded-full bg-accent/50 px-2.5 py-1.5 hover:bg-accent transition-colors"
+                  aria-label="Аккаунт"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={me?.avatarUrl || undefined} alt={me?.name || me?.email || "User"} />
+                    <AvatarFallback>{getInitials(me?.name || undefined, me?.email || undefined)}</AvatarFallback>
+                  </Avatar>
+                  <span className="max-w-[140px] truncate text-sm font-medium">
+                    {me.name || me.email}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="truncate">
+                  {me?.name || me?.email}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {me?.role === "ADMIN" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">Админка</Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">Профиль и аватар</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-red-600 focus:text-red-600">
+                  Выйти
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           {/* Кнопка звонка */}
           <Button variant="outline" size="default" asChild className="hidden lg:flex items-center space-x-2">
             <a href="tel:+79996164437" aria-label="Позвонить консультанту">
               <Phone className="h-[1.2rem] w-[1.2rem]" />
-              <span>Позвонить консультанту</span>
+              <span>Позвонить</span>
             </a>
           </Button>
 
@@ -177,22 +249,6 @@ export default function Header() {
           <Button variant="outline" size="icon" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className="cursor-pointer">
             {theme === "light" ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
           </Button>
-
-          {/* === НОВОЕ: Auth === */}
-          {!loading && !me && (
-            <>
-              <Button variant="outline" onClick={() => setOpenLogin(true)}>Вход</Button>
-              <Button variant="default" onClick={() => setOpenRegister(true)}>Регистрация</Button>
-            </>
-          )}
-
-          {!loading && me && (
-            <div className="flex items-center gap-3">
-              {me.role === "ADMIN" && <Link className="underline" href="/admin">Админка</Link>}
-              <span className="text-sm opacity-80">{me.email}</span>
-              <Button variant="outline" onClick={logout}>Выйти</Button>
-            </div>
-          )}
 
           {/* Мобильное меню */}
           <Sheet>
@@ -237,18 +293,28 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Диалоги авторизации */}
-      <Dialog open={openLogin} onOpenChange={setOpenLogin}>
+      {/* Диалог вход/регистрация */}
+      <Dialog open={openAuth} onOpenChange={setOpenAuth}>
         <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader><DialogTitle>Вход</DialogTitle></DialogHeader>
-          <LoginForm onDoneAction={() => setOpenLogin(false)} />
-        </DialogContent>
-      </Dialog>
+          <DialogHeader>
+            <DialogTitle>Аккаунт</DialogTitle>
+            <DialogDescription>Войдите в аккаунт или создайте новый.</DialogDescription>
+          </DialogHeader>
 
-      <Dialog open={openRegister} onOpenChange={setOpenRegister}>
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader><DialogTitle>Регистрация</DialogTitle></DialogHeader>
-          <RegisterForm onDoneAction={() => setOpenRegister(false)} />
+          <Tabs value={authTab} onValueChange={(v) => setAuthTab(v as "login" | "register")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Вход</TabsTrigger>
+              <TabsTrigger value="register">Регистрация</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login" className="mt-4">
+              <LoginForm onDoneAction={() => setOpenAuth(false)} />
+            </TabsContent>
+
+            <TabsContent value="register" className="mt-4">
+              <RegisterForm onDoneAction={() => setOpenAuth(false)} />
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </header>

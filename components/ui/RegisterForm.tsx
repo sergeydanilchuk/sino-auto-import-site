@@ -15,11 +15,15 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { useMe } from "@/lib/useMe";
+import { notifyAuth } from "@/lib/authBus"; // 👈 добавлено
 
 type Props = { onDoneAction?: () => void };
 
 export default function RegisterForm({ onDoneAction }: Props) {
   const r = useRouter();
+  const { mutate } = useMe();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -78,7 +82,13 @@ export default function RegisterForm({ onDoneAction }: Props) {
 
   const level = getPasswordLevel(password);
   const strengthLabel =
-    level === 0 ? "Недопустимый" : level === 1 ? "Слабый" : level === 2 ? "Средний" : "Сильный";
+    level === 0
+      ? "Недопустимый"
+      : level === 1
+      ? "Слабый"
+      : level === 2
+      ? "Средний"
+      : "Сильный";
 
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const meetsMinStrength = level >= 3;
@@ -88,7 +98,7 @@ export default function RegisterForm({ onDoneAction }: Props) {
     isEmail &&
     confirm === password &&
     meetsMinStrength &&
-    !!captchaToken; // 👈 добавлено: без капчи не валидно
+    !!captchaToken;
 
   const badgeClasses =
     level <= 1
@@ -110,23 +120,21 @@ export default function RegisterForm({ onDoneAction }: Props) {
       setShake(true);
 
       let description = "";
-      if (!name.trim()) {
-        description = "Введите имя";
-      } else if (!isEmail) {
-        description = "Некорректный email";
-      } else if (password.length < 6) {
+      if (!name.trim()) description = "Введите имя";
+      else if (!isEmail) description = "Некорректный email";
+      else if (password.length < 6)
         description = "Пароль должен содержать минимум 6 символов.";
-      } else if (/[А-Яа-яЁё]/.test(password)) {
+      else if (/[А-Яа-яЁё]/.test(password))
         description = "Пароль не может содержать кириллицу — используйте латиницу.";
-      } else if (forbiddenSpecialRe.test(password)) {
-        description = 'Недопустимые символы. Разрешены только: ! @ # $ % ^ & * ( ) - _ = + { } [ ] : " \\';
-      } else if (confirm !== password) {
-        description = "Пароли не совпадают";
-      } else if (!meetsMinStrength) {
-        description = "Нужен уровень «Сильный». Подсказки — продолжайте ввод или посмотрите в бэдж.";
-      } else if (!captchaToken) {
+      else if (forbiddenSpecialRe.test(password))
+        description =
+          'Недопустимые символы. Разрешены только: ! @ # $ % ^ & * ( ) - _ = + { } [ ] : " \\';
+      else if (confirm !== password) description = "Пароли не совпадают";
+      else if (!meetsMinStrength)
+        description =
+          "Нужен уровень «Сильный». Подсказки — продолжайте ввод или посмотрите в бэдж.";
+      else if (!captchaToken)
         description = "Подтвердите, что вы человек (капча).";
-      }
 
       toast.error("Проверьте корректность данных", { description });
       setTimeout(() => setShake(false), 500);
@@ -138,7 +146,12 @@ export default function RegisterForm({ onDoneAction }: Props) {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, turnstileToken: captchaToken }), // 👈 добавлено
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          turnstileToken: captchaToken,
+        }),
       });
 
       if (!res.ok) {
@@ -151,9 +164,15 @@ export default function RegisterForm({ onDoneAction }: Props) {
         return;
       }
 
+      await mutate(); // обновим /api/auth/me
+      r.refresh(); // перерисуем серверные компоненты/хедер
+      notifyAuth("register"); // 👈 сообщим другим вкладкам
+
       toast.success("Аккаунт успешно создан ✅");
-      onDoneAction?.();
-      r.refresh();
+      onDoneAction?.(); // закрыть диалог
+      setPassword("");
+      setConfirm("");
+      setCaptchaToken("");
     } catch {
       setErr("Сеть недоступна. Повторите позже.");
       toast.warning("Проблема с сетью");
@@ -218,7 +237,9 @@ export default function RegisterForm({ onDoneAction }: Props) {
                       <span
                         className={
                           "inline-flex items-center gap-1 text-[10px] leading-none px-2 py-1 rounded-full ring-1 transition-all duration-200 transition-colors select-none " +
-                          (password.length === 0 ? "opacity-0 scale-95" : "opacity-100 scale-100") +
+                          (password.length === 0
+                            ? "opacity-0 scale-95"
+                            : "opacity-100 scale-100") +
                           " " +
                           badgeClasses
                         }
@@ -245,9 +266,11 @@ export default function RegisterForm({ onDoneAction }: Props) {
                       className="max-w-xs text-xs data-[side=bottom]:origin-top-left"
                     >
                       <ul className="list-disc pl-4 space-y-1">
-                        {getHintsList(password).slice(0, 3).map((h) => (
-                          <li key={h}>{h}</li>
-                        ))}
+                        {getHintsList(password)
+                          .slice(0, 3)
+                          .map((h) => (
+                            <li key={h}>{h}</li>
+                          ))}
                       </ul>
                     </TooltipContent>
                   </Tooltip>
@@ -258,7 +281,9 @@ export default function RegisterForm({ onDoneAction }: Props) {
                 type="button"
                 className="absolute right-2 top-2 text-muted-foreground hover:text-foreground transition cursor-pointer"
                 onClick={() => setShowPassword((p) => !p)}
-                aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+                aria-label={
+                  showPassword ? "Скрыть пароль" : "Показать пароль"
+                }
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -290,14 +315,17 @@ export default function RegisterForm({ onDoneAction }: Props) {
           </div>
 
           {/* Turnstile */}
-          <div className="mt-1">
-            <Turnstile
-              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-              onSuccess={(t)=>setCaptchaToken(t)}
-              onExpire={()=>setCaptchaToken("")}
-              onError={()=>setCaptchaToken("")}
-            />
-
+          <div className="w-full flex items-center justify-center">
+            <div className="min-h-[88px] w-full max-w-[360px] flex items-center justify-center">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                options={{ size: "flexible" }}
+                className="w-full"
+                onSuccess={(t) => setCaptchaToken(t)}
+                onExpire={() => setCaptchaToken("")}
+                onError={() => setCaptchaToken("")}
+              />
+            </div>
           </div>
 
           {err && <p className="text-sm text-red-600">{err}</p>}
@@ -305,7 +333,7 @@ export default function RegisterForm({ onDoneAction }: Props) {
           <Button
             type="submit"
             className="w-full mt-1 flex items-center justify-center gap-2 cursor-pointer"
-            disabled={loading || !captchaToken} // 👈 без токена нельзя
+            disabled={loading || !captchaToken}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? "Создаём..." : "Создать аккаунт"}
