@@ -6,5 +6,8 @@ const nextConfig = {
       './node_modules/@prisma/engines/**',
     ],
   },
+  experimental: {},
 };
+
 export default nextConfig;
+

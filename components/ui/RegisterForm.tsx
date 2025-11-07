@@ -8,13 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Eye, EyeOff, Check, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-// Tooltip (shadcn/ui)
 import {
   Tooltip,
   TooltipProvider,
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 type Props = { onDoneAction?: () => void };
 
@@ -33,17 +33,16 @@ export default function RegisterForm({ onDoneAction }: Props) {
   const [pwdFocused, setPwdFocused] = useState(false);
   const [submittedOnce, setSubmittedOnce] = useState(false);
 
+  const [captchaToken, setCaptchaToken] = useState(""); // 👈 добавлено
   const pwdRef = useRef<HTMLInputElement>(null);
 
-  // Разрешённые спецсимволы: ! @ # $ % ^ & * ( ) - _ = + { } [ ] : " \
   const allowedSpecialRe = /[!@#$%^&*()\-\_\=\+{}\[\]:"\\]/;
   const forbiddenSpecialRe = /[^A-Za-z0-9!@#$%^&*()\-\_\=\+{}\[\]:"\\]/;
 
-  // === 3 уровня (Слабый/Средний/Сильный) ===
   function getPasswordLevel(pw: string): 0 | 1 | 2 | 3 {
     if (!pw) return 0;
-    if (/[А-Яа-яЁё]/.test(pw)) return 0;      // запрет кириллицы
-    if (forbiddenSpecialRe.test(pw)) return 0; // запрет иных спецсимволов
+    if (/[А-Яа-яЁё]/.test(pw)) return 0;
+    if (forbiddenSpecialRe.test(pw)) return 0;
     if (pw.length < 6) return 0;
 
     const hasLower = /[a-z]/.test(pw);
@@ -56,9 +55,9 @@ export default function RegisterForm({ onDoneAction }: Props) {
     const categories =
       (hasLetter ? 1 : 0) + (hasDigit ? 1 : 0) + (hasSpecial ? 1 : 0);
 
-    if (categories >= 3 && mixedCase) return 3;                 // Сильный
-    if (categories >= 3 || (categories >= 2 && mixedCase)) return 2; // Средний
-    if (categories >= 2) return 1;                               // Слабый
+    if (categories >= 3 && mixedCase) return 3;
+    if (categories >= 3 || (categories >= 2 && mixedCase)) return 2;
+    if (categories >= 2) return 1;
     return 0;
   }
 
@@ -82,16 +81,15 @@ export default function RegisterForm({ onDoneAction }: Props) {
     level === 0 ? "Недопустимый" : level === 1 ? "Слабый" : level === 2 ? "Средний" : "Сильный";
 
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  // регистрация по-прежнему требует «Сильный»
   const meetsMinStrength = level >= 3;
 
   const isValid =
     name.trim().length > 0 &&
     isEmail &&
     confirm === password &&
-    meetsMinStrength;
+    meetsMinStrength &&
+    !!captchaToken; // 👈 добавлено: без капчи не валидно
 
-  // Цвета бэджа
   const badgeClasses =
     level <= 1
       ? "bg-red-100 text-red-700 ring-red-200"
@@ -99,7 +97,6 @@ export default function RegisterForm({ onDoneAction }: Props) {
       ? "bg-yellow-100 text-yellow-800 ring-yellow-200"
       : "bg-green-100 text-green-700 ring-green-200";
 
-  // Авто-открытие тултипа
   const tooltipOpen =
     (pwdFocused && password.length > 0 && level < 3) ||
     (submittedOnce && !meetsMinStrength);
@@ -127,6 +124,8 @@ export default function RegisterForm({ onDoneAction }: Props) {
         description = "Пароли не совпадают";
       } else if (!meetsMinStrength) {
         description = "Нужен уровень «Сильный». Подсказки — продолжайте ввод или посмотрите в бэдж.";
+      } else if (!captchaToken) {
+        description = "Подтвердите, что вы человек (капча).";
       }
 
       toast.error("Проверьте корректность данных", { description });
@@ -139,7 +138,7 @@ export default function RegisterForm({ onDoneAction }: Props) {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, turnstileToken: captchaToken }), // 👈 добавлено
       });
 
       if (!res.ok) {
@@ -212,12 +211,10 @@ export default function RegisterForm({ onDoneAction }: Props) {
                 className="pr-28"
               />
 
-              {/* Бэдж индикатор + точная привязка тултипа */}
               <div className="pointer-events-none absolute right-9 top-1/2 -translate-y-1/2">
                 <TooltipProvider delayDuration={0}>
                   <Tooltip open={tooltipOpen}>
                     <div className="relative inline-block">
-                      {/* Бэдж (неинтерактивный) */}
                       <span
                         className={
                           "inline-flex items-center gap-1 text-[10px] leading-none px-2 py-1 rounded-full ring-1 transition-all duration-200 transition-colors select-none " +
@@ -235,13 +232,11 @@ export default function RegisterForm({ onDoneAction }: Props) {
                         {strengthLabel}
                       </span>
 
-                      {/* Нулевой «якорь» в правом нижнем углу бэджа — это Trigger */}
                       <TooltipTrigger asChild>
                         <span className="absolute bottom-0 right-0 w-0 h-0" />
                       </TooltipTrigger>
                     </div>
 
-                    {/* Верхний левый угол тултипа = правый нижний угол бэджа */}
                     <TooltipContent
                       side="bottom"
                       align="start"
@@ -294,12 +289,23 @@ export default function RegisterForm({ onDoneAction }: Props) {
             </div>
           </div>
 
+          {/* Turnstile */}
+          <div className="mt-1">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(t)=>setCaptchaToken(t)}
+              onExpire={()=>setCaptchaToken("")}
+              onError={()=>setCaptchaToken("")}
+            />
+
+          </div>
+
           {err && <p className="text-sm text-red-600">{err}</p>}
 
           <Button
             type="submit"
             className="w-full mt-1 flex items-center justify-center gap-2 cursor-pointer"
-            disabled={loading}
+            disabled={loading || !captchaToken} // 👈 без токена нельзя
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? "Создаём..." : "Создать аккаунт"}
