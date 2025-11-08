@@ -6,7 +6,11 @@ const nextConfig = {
       './node_modules/@prisma/engines/**',
     ],
   },
-
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'blob.vercel-storage.com' },
+    ],
+  },
   experimental: {},
 };
 
