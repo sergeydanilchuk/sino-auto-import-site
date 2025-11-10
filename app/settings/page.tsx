@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import MeRefetcher from "@/components/MeRefetcher";
-import AvatarEditorLauncher from "@/components/AvatarEditorLauncher";
+import AvatarEditorLauncher from "@/components/avatar/AvatarEditorLauncher";
 
 export default async function SettingsPage() {
   const me = await getCurrentUser();
