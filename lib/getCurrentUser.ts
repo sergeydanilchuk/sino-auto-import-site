@@ -3,7 +3,16 @@ import { COOKIE_NAME, verifySession } from "./auth";
 import { prisma } from "./prisma";
 
 export async function getCurrentUser() {
-  const token = (await cookies()).get(COOKIE_NAME)?.value;
+  let token: string | undefined;
+
+  try {
+    const jar = await cookies();
+    token = jar.get(COOKIE_NAME)?.value;
+  } catch (e) {
+    console.error("getCurrentUser: failed to read cookies:", e);
+    return null;
+  }
+
   if (!token) return null;
 
   try {
@@ -22,7 +31,8 @@ export async function getCurrentUser() {
     });
 
     return user;
-  } catch {
+  } catch (e) {
+    console.error("getCurrentUser: verify or DB lookup failed:", e);
     return null;
   }
 }

@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import { Toaster } from "@/components/ui/sonner";
-import AuthSync from "@/app/_client-auth-sync"; // 👈 добавили импорт
+import AuthSync from "@/app/_client-auth-sync";
 
 export const metadata: Metadata = {
   title: "Sino Auto Import - Автомобили из Китая, Южной Кореи и Японии",
