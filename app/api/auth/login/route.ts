@@ -16,7 +16,11 @@ export async function POST(req: Request) {
   const token = await createSession({ id: user.id, email: user.email, role: user.role });
   const res = NextResponse.json({ ok: true });
   res.cookies.set(COOKIE_NAME, token, {
-    httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: 60*60*24*30,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
   });
   return res;
 }

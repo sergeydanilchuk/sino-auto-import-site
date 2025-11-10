@@ -23,8 +23,8 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 
-import LoginForm from "@/components/ui/LoginForm"
-import RegisterForm from "@/components/ui/RegisterForm"
+import LoginForm from "@/components/features/auth/LoginForm"
+import RegisterForm from "@/components/features/auth/RegisterForm"
 import { useMe } from "@/lib/useMe"
 import { useRouter } from "next/navigation"
 import { notifyAuth } from "@/lib/authBus"

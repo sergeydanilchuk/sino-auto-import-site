@@ -14,7 +14,10 @@ export function getAuthBus(): BroadcastChannel | null {
   return channel;
 }
 
-export function notifyAuth(event: "login" | "logout" | "register") {
+// 🔹 Добавлен тип "profile-updated"
+export type AuthBusEvent = "login" | "logout" | "register" | "profile-updated";
+
+export function notifyAuth(event: AuthBusEvent) {
   const bus = getAuthBus();
   if (!bus) return;
   bus.postMessage({ event, ts: Date.now() });

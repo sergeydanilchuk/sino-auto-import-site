@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Car, FileText } from "lucide-react"
-import PopupForm from "@/components/PopupForm"
+import PopupForm from "@/components/dialogs/PopupForm"
 import Breadcrumbs from "@/components/Breadcrumbs"
 
 export default function HowOrderPage() {
