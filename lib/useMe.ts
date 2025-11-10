@@ -11,7 +11,7 @@ type Me = {
 };
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((res) => res.json());
+  fetch(url, { credentials: "include", cache: "no-store" }).then((res) => res.json());
 
 export function useMe() {
   const { data, isLoading, mutate } = useSWR<{ user: Me | null }>(
