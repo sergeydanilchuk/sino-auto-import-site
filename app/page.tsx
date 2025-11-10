@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Car, ShieldCheck, Globe, Wallet, FileText, ChevronDown, Quote, Phone } from "lucide-react"
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa"
-import PopupForm from "@/components/PopupForm"
+import PopupForm from "@/components/dialogs/PopupForm"
 import VideoSection from "@/components/sections/VideoSection";
 import FaqSection from "@/components/sections/FaqSection"
 import YandexMap from "@/components/YandexMap";
