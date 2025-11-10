@@ -9,10 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
-import { put } from "@vercel/blob";
 import MeRefetcher from "@/components/MeRefetcher";
-import AvatarEditorDialog from "@/components/AvatarEditorDialog";
 import AvatarEditorLauncher from "@/components/AvatarEditorLauncher";
 
 export default async function SettingsPage() {
@@ -20,25 +17,42 @@ export default async function SettingsPage() {
   if (!me) redirect("/");
 
   return (
-    <div className="container max-w-2xl py-10 space-y-8">
-    <MeRefetcher />
-      <h1 className="text-2xl font-semibold">Настройки профиля</h1>
+    <section className="py-16 border-t border-border/40 bg-muted/40">
+      <MeRefetcher />
+      <div className="container mx-auto px-12">
+        <div className="w-full p-6 md:p-10 bg-muted/40 backdrop-blur-sm border border-border/50 ring-1 ring-border/30 rounded-2xl">
+          <h1 className="text-3xl md:text-4xl font-bold mb-10 text-left">
+            Настройки профиля
+          </h1>
 
-      <Card className="p-6 space-y-4">
-        <h2 className="text-lg font-medium">Имя</h2>
-        <form action={updateName}>
-          <div className="flex items-center gap-3">
-            <Input name="name" defaultValue={me.name ?? ""} placeholder="Ваше имя" />
-            <Button type="submit">Сохранить</Button>
+          {/* Основной контент */}
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-10">
+            {/* Левая часть — аватар */}
+            <div className="flex flex-col items-center md:items-start gap-4">
+                <AvatarEditorLauncher currentUrl={me.avatarUrl ?? null} />
+            </div>
+
+            {/* Правая часть — имя и кнопка */}
+            <Card className="flex-1 p-6 md:p-8 space-y-4 w-full">
+              <h2 className="text-lg font-medium text-left">Имя пользователя</h2>
+              <form action={updateName}>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Input
+                    name="name"
+                    defaultValue={me.name ?? ""}
+                    placeholder="Ваше имя"
+                    className="sm:flex-1 text-base"
+                  />
+                  <Button type="submit" className="whitespace-nowrap">
+                    Сохранить
+                  </Button>
+                </div>
+              </form>
+            </Card>
           </div>
-        </form>
-      </Card>
-
-      <Card className="p-6 space-y-4">
-        <h2 className="text-lg font-medium">Аватар</h2>
-        <AvatarEditorLauncher currentUrl={me.avatarUrl ?? null} />
-      </Card>
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -67,6 +81,7 @@ async function uploadAvatar(formData: FormData) {
   if (file.size > 2_000_000) return;
 
   const { put, del } = await import("@vercel/blob");
+
   const prev = await prisma.user.findUnique({
     where: { id: me.id },
     select: { avatarUrl: true },
