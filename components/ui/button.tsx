@@ -19,6 +19,8 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        telegram: "bg-[#229ED9] text-white hover:bg-[#1b8cbf]",
+        whatsapp: "bg-[#25D366] text-white hover:bg-[#1fb85a]",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

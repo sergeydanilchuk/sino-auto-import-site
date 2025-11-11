@@ -29,7 +29,7 @@ model Part {
   id          String       @id @default(cuid())
   sku         String   @unique @default(cuid())
   partNumber  String?                          // номер детали
-  name        String                            // название
+  name        String                           // название
   categoryId  String?
   category    PartCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 

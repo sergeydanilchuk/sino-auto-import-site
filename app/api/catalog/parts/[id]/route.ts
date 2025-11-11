@@ -1,14 +1,17 @@
+// app/api/catalog/parts/[id]/route.ts
 export const runtime = "nodejs";
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-type Ctx = { params: { id: string } };
+type Params = { id: string };
 
 // Получение одной детали
-export async function GET(_req: Request, { params }: Ctx) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<Params> }) {
+  const { id } = await params;
+
   const item = await prisma.part.findUnique({
-    where: { id: params.id },
+    where: { id },
     select: {
       id: true,
       sku: true,
@@ -25,17 +28,21 @@ export async function GET(_req: Request, { params }: Ctx) {
     },
   });
 
-  if (!item) return new NextResponse("Not found", { status: 404 });
+  if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ item });
 }
 
 // Удаление детали по параметру пути
-export async function DELETE(_req: Request, { params }: Ctx) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<Params> }) {
+  const { id } = await params;
+
   try {
-    await prisma.part.delete({ where: { id: params.id } });
+    await prisma.part.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    if (e?.code === "P2025") return new NextResponse("Not found", { status: 404 });
-    return new NextResponse(e?.message ?? "Bad Request", { status: 400 });
+    if (e?.code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ error: e?.message ?? "Bad Request" }, { status: 400 });
   }
 }
