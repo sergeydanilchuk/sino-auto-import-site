@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { PanelLeft, LayoutDashboard, Users, FileText, Settings } from "lucide-react";
+import { PanelLeft, LayoutDashboard, Users, FileText, Settings, Cog} from "lucide-react";
 
 type Props = {
   children: React.ReactNode;
@@ -17,6 +17,7 @@ const NAV = [
   { href: "/admin", label: "Главная", Icon: LayoutDashboard },
   { href: "/admin/users", label: "Пользователи", Icon: Users },
   { href: "/admin/posts", label: "Посты", Icon: FileText },
+  { href: "/admin/parts", label: "Запчасти", Icon: Cog},
   { href: "/settings", label: "Настройки профиля", Icon: Settings },
 ];
 

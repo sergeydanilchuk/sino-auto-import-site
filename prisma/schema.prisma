@@ -17,10 +17,43 @@ model User {
   role      UserRole @default(USER)
   avatarUrl String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now()) 
+  updatedAt DateTime @updatedAt @default(now())
 }
 
 enum UserRole {
   USER
   ADMIN
 }
+
+model Part {
+  id          String       @id @default(cuid())
+  sku         String   @unique @default(cuid())
+  partNumber  String?                          // номер детали
+  name        String                            // название
+  categoryId  String?
+  category    PartCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  imageUrl    String?                          // одно фото
+  price       Decimal      @db.Decimal(10, 2)   // стоимость
+  stock       Int          @default(0)          // остаток
+  status      PartStatus    @default(IN_STOCK)  // статус
+  description String?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([name])
+  @@index([categoryId])
+}
+
+model PartCategory {
+  id    String @id @default(cuid())
+  name  String @unique
+  parts Part[]
+}
+
+enum PartStatus {
+  IN_STOCK
+  ON_ORDER
+}
+
