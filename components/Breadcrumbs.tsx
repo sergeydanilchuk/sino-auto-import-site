@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { Home, SlashIcon } from "lucide-react"
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { Home, SlashIcon } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,55 +10,74 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/breadcrumb";
+import { cn } from "@/lib/utils";
 
-// Карта путей для реальных страниц
-const pathMap: Record<string, string> = {
-  // Основные страницы
-  "/about": "О компании",
-  "/catalog": "Каталог авто", 
-  "/contacts": "Контакты",
-  "/faq": "Часто задаваемые вопросы",
-  "/services": "Услуги",
-  "/howorder": "Как заказать",
-  
-  // Услуги
-  "/services/delivery": "Доставка",
-  "/services/customs": "Растаможка",
-}
+// Русские названия сегментов
+const segmentLabels: Record<string, string> = {
+  // Корневые страницы
+  "about": "О компании",
+  "catalog": "Каталог авто",
+  "contacts": "Контакты",
+  "faq": "Часто задаваемые вопросы",
+  "services": "Услуги",
+  "howorder": "Как заказать",
+
+  // Подстраницы
+  "delivery": "Доставка",
+  "customs": "Растаможка",
+
+  // Каталог авто
+  "china": "Авто из Китая",
+  "korea": "Авто из Кореи",
+  "japan": "Авто из Японии",
+
+  // Запчасти
+  "parts": "Запчасти",
+
+  // Технические страницы
+  "admin": "Админка",
+  "settings": "Настройки профиля",
+};
 
 interface BreadcrumbsProps {
-  className?: string
-  customItems?: Array<{ label: string; href?: string }>
+  className?: string;
+  customItems?: Array<{ label: string; href?: string }>;
 }
 
 export default function Breadcrumbs({ className, customItems }: BreadcrumbsProps) {
-  const pathname = usePathname()
-  
-  // Если на главной странице, не показываем breadcrumbs
-  if (pathname === '/') return null
-  
-  // Если передан кастомный массив, используем его
-  const items = customItems || (() => {
-    const pathSegments = pathname.split('/').filter(segment => segment !== '')
-    
-    return pathSegments.map((segment, index) => {
-      const href = '/' + pathSegments.slice(0, index + 1).join('/')
-      const label = pathMap[href] || segment.charAt(0).toUpperCase() + segment.slice(1)
-      
-      return {
-        label,
-        href: index === pathSegments.length - 1 ? undefined : href
-      }
-    })
-  })()
+  const pathname = usePathname();
+
+  if (pathname === "/") return null;
+
+  // Если переданы кастомные элементы — используем только их
+  const items =
+    customItems ||
+    (() => {
+      const segments = pathname.split("/").filter(Boolean);
+
+      return segments.map((segment, index) => {
+        const href = "/" + segments.slice(0, index + 1).join("/");
+
+        // Если сегмент известен — используем русское название
+        const label =
+          segmentLabels[segment] ||
+          segment.charAt(0).toUpperCase() + segment.slice(1);
+
+        const isLast = index === segments.length - 1;
+
+        return {
+          label,
+          href: isLast ? undefined : href,
+        };
+      });
+    })();
 
   return (
     <div className={cn("container mx-auto px-4 sm:px-12 mb-6", className)}>
       <Breadcrumb>
         <BreadcrumbList>
-          {/* Главная страница */}
+          {/* Главная */}
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
               <Link href="/" className="flex items-center gap-1">
@@ -67,12 +86,13 @@ export default function Breadcrumbs({ className, customItems }: BreadcrumbsProps
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          
-          {/* Динамически генерируем элементы с разделителями */}
+
+          {/* Остальные */}
           {items.flatMap((item, index) => [
-            <BreadcrumbSeparator key={`separator-${index}`}>
+            <BreadcrumbSeparator key={`sep-${index}`}>
               <SlashIcon />
             </BreadcrumbSeparator>,
+
             <BreadcrumbItem key={`item-${index}`}>
               {item.href ? (
                 <BreadcrumbLink asChild>
@@ -81,10 +101,10 @@ export default function Breadcrumbs({ className, customItems }: BreadcrumbsProps
               ) : (
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>
               )}
-            </BreadcrumbItem>
+            </BreadcrumbItem>,
           ])}
         </BreadcrumbList>
       </Breadcrumb>
     </div>
-  )
+  );
 }

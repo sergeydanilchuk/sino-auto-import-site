@@ -1,3 +1,4 @@
+// app/admin/parts/AddPartDialog.tsx
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -7,15 +8,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup, SelectLabel,
-} from "@/components/ui/select";
-import { Loader2, Image as ImageIcon, X } from "lucide-react";
+import { Loader2, Image as ImageIcon, X, ChevronsUpDown, Check, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const NONE_CAT = "__NONE__";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+
 const NEW_CAT = "__NEW__";
 
 type Cat = { id: string; name: string };
@@ -29,7 +46,7 @@ export default function AddPartDialog() {
 
   const [cats, setCats] = useState<Cat[]>([]);
   const [catsLoading, setCatsLoading] = useState(true);
-  const [selectedCat, setSelectedCat] = useState<string>(NONE_CAT);
+  const [selectedCat, setSelectedCat] = useState<string>(""); // нет категории по умолчанию
   const [newCatName, setNewCatName] = useState("");
 
   const [status, setStatus] = useState<"IN_STOCK" | "ON_ORDER">("IN_STOCK");
@@ -43,6 +60,9 @@ export default function AddPartDialog() {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+
+  const [catPopoverOpen, setCatPopoverOpen] = useState(false);
+  const [deletingCatId, setDeletingCatId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -96,6 +116,7 @@ export default function AddPartDialog() {
     if (!price.trim()) return false;
     if (!stock.trim()) return false;
     if (selectedCat === NEW_CAT && !newCatName.trim()) return false;
+    // если категория не выбрана вообще — ок, будет "без категории"
     return true;
   }, [saving, name, price, stock, selectedCat, newCatName]);
 
@@ -116,15 +137,16 @@ export default function AddPartDialog() {
 
       if (selectedCat === NEW_CAT) {
         fd.append("newCategoryName", newCatName.trim());
-      } else if (selectedCat !== NONE_CAT) {
+      } else if (selectedCat) {
         fd.append("categoryId", selectedCat);
       }
+      // selectedCat === "" => ничего не передаём => без категории
 
       if (file) fd.append("file", file, file.name);
 
       const res = await fetch("/api/catalog/parts", {
         method: "POST",
-        body: fd, // без Content-Type
+        body: fd,
       });
       if (!res.ok) throw new Error(await res.text());
 
@@ -140,7 +162,7 @@ export default function AddPartDialog() {
   }
 
   function resetLocalState() {
-    setSelectedCat(NONE_CAT);
+    setSelectedCat("");
     setNewCatName("");
     setStatus("IN_STOCK");
     setName("");
@@ -157,15 +179,59 @@ export default function AddPartDialog() {
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <ImageIcon className="h-4 w-4" />
         <span className="truncate max-w-60">{file.name}</span>
-        <Button type="button" variant="ghost" size="sm" className="h-7 px-2" onClick={clearFile}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2"
+          onClick={clearFile}
+        >
           <X className="h-4 w-4" />
         </Button>
       </div>
     );
   }, [file]);
 
+  function getSelectedCatName() {
+    if (selectedCat === NEW_CAT) return "Создать новую категорию…";
+    const found = cats.find((c) => c.id === selectedCat);
+    return found?.name ?? "";
+  }
+
+  async function handleDeleteCategory(id: string, name: string) {
+    if (!window.confirm(`Удалить категорию «${name}»?\nВсе запчасти из неё станут «без категории».`)) {
+      return;
+    }
+
+    try {
+      setDeletingCatId(id);
+      const res = await fetch(
+        `/api/catalog/parts/categories?id=${encodeURIComponent(id)}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) throw new Error(await res.text());
+
+      toast.success(`Категория «${name}» удалена.`);
+      setCats((prev) => prev.filter((c) => c.id !== id));
+      if (selectedCat === id) {
+        setSelectedCat("");
+        setNewCatName("");
+      }
+    } catch {
+      toast.error("Не удалось удалить категорию");
+    } finally {
+      setDeletingCatId(null);
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setErr(null); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setErr(null);
+      }}
+    >
       <DialogTrigger asChild>
         <Button>Добавить запчасть</Button>
       </DialogTrigger>
@@ -179,36 +245,119 @@ export default function AddPartDialog() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2 grid gap-2">
               <Label htmlFor="name">Название *</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="partNumber">№ детали (partNumber)</Label>
-              <Input id="partNumber" value={partNumber} onChange={(e) => setPartNumber(e.target.value)} />
+              <Input
+                id="partNumber"
+                value={partNumber}
+                onChange={(e) => setPartNumber(e.target.value)}
+              />
             </div>
 
+            {/* Категория с поиском и удалением */}
             <div className="grid gap-2">
               <Label>Категория</Label>
-              <Select value={selectedCat} onValueChange={setSelectedCat}>
-                <SelectTrigger>
-                  <SelectValue placeholder={catsLoading ? "Загрузка…" : "Выберите категорию"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Действия</SelectLabel>
-                    <SelectItem value={NONE_CAT}>— без категории —</SelectItem>
-                    <SelectItem value={NEW_CAT}>➕ Добавить новую…</SelectItem>
-                  </SelectGroup>
-                  {cats.length > 0 && (
-                    <SelectGroup>
-                      <SelectLabel>Категории</SelectLabel>
-                      {cats.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Popover
+                  open={catPopoverOpen}
+                  onOpenChange={setCatPopoverOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between"
+                      disabled={catsLoading}
+                    >
+                      {getSelectedCatName() ||
+                        (catsLoading ? "Загрузка…" : "Выберите категорию")}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[260px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Найти категорию..." />
+                      <CommandList>
+                        <CommandEmpty>Ничего не найдено</CommandEmpty>
+
+                        <CommandGroup heading="Действия">
+                          <CommandItem
+                            onSelect={() => {
+                              setSelectedCat(NEW_CAT);
+                              setCatPopoverOpen(false);
+                            }}
+                          >
+                            <span className="mr-2">+</span>
+                            Создать новую категорию…
+                          </CommandItem>
+                        </CommandGroup>
+
+                        <CommandSeparator />
+
+                        <CommandGroup heading="Категории">
+                          {cats.map((c) => (
+                            <CommandItem
+                              key={c.id}
+                              value={c.name}
+                              onSelect={() => {
+                                setSelectedCat(c.id);
+                                setCatPopoverOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={
+                                  "mr-2 h-4 w-4 " +
+                                  (selectedCat === c.id
+                                    ? "opacity-100"
+                                    : "opacity-0")
+                                }
+                              />
+                              <span className="flex-1">{c.name}</span>
+                              <button
+                                type="button"
+                                className="ml-2 inline-flex items-center text-xs text-red-500 hover:text-red-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!deletingCatId) {
+                                    handleDeleteCategory(c.id, c.name);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Сброс выбора категории */}
+                {selectedCat && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setSelectedCat("");
+                      setNewCatName("");
+                    }}
+                    className="shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
 
               {selectedCat === NEW_CAT && (
                 <Input
@@ -221,15 +370,16 @@ export default function AddPartDialog() {
 
             <div className="grid gap-2">
               <Label>Статус *</Label>
-              <Select value={status} onValueChange={(v) => setStatus(v as any)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите статус" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="IN_STOCK">В наличии</SelectItem>
-                  <SelectItem value="ON_ORDER">Под заказ</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(e.target.value as "IN_STOCK" | "ON_ORDER")
+                }
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+              >
+                <option value="IN_STOCK">В наличии</option>
+                <option value="ON_ORDER">Под заказ</option>
+              </select>
             </div>
 
             <div className="grid gap-2">
@@ -259,7 +409,12 @@ export default function AddPartDialog() {
             <div className="md:col-span-2 grid gap-2">
               <Label>Фото</Label>
               <div className="flex items-center gap-3">
-                <Button type="button" variant="secondary" onClick={pickFile} disabled={saving}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={pickFile}
+                  disabled={saving}
+                >
                   {file ? "Заменить файл" : "Загрузить файл"}
                 </Button>
                 {saving && (
@@ -272,18 +427,33 @@ export default function AddPartDialog() {
               {filePreview && (
                 <div className="flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={filePreview} alt="preview" className="h-20 w-20 rounded-md object-cover border" />
+                  <img
+                    src={filePreview}
+                    alt="preview"
+                    className="h-20 w-20 rounded-md object-cover border"
+                  />
                   {fileBadge}
                 </div>
               )}
 
-              <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFileChange} />
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={onFileChange}
+              />
             </div>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Описание</Label>
-            <Textarea id="description" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Textarea
+              id="description"
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
 
           {err && <p className="text-sm text-red-600">{err}</p>}

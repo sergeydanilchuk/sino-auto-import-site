@@ -236,7 +236,7 @@ export default function RegisterForm({ onDoneAction }: Props) {
                     <div className="relative inline-block">
                       <span
                         className={
-                          "inline-flex items-center gap-1 text-[10px] leading-none px-2 py-1 rounded-full ring-1 transition-all duration-200 transition-colors select-none " +
+                          "inline-flex items-center gap-1 text-[10px] leading-none px-2 py-1 rounded-full ring-1 select-none transition duration-200" +
                           (password.length === 0
                             ? "opacity-0 scale-95"
                             : "opacity-100 scale-100") +

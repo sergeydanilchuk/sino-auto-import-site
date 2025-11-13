@@ -34,3 +34,26 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json(created, { status: 201 });
 }
+
+export async function DELETE(req: NextRequest) {
+  // 👉 id берём из query-параметра ?id=...
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return NextResponse.json({ error: "id is required" }, { status: 400 });
+  }
+
+  // транзакция: сначала отвязываем детали, потом удаляем категорию
+  await prisma.$transaction([
+    prisma.part.updateMany({
+      where: { categoryId: id },
+      data: { categoryId: null },
+    }),
+    prisma.partCategory.delete({
+      where: { id },
+    }),
+  ]);
+
+  return NextResponse.json({ ok: true });
+}

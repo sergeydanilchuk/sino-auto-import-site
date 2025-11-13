@@ -48,12 +48,12 @@ function DropdownMenuNav({
   const renderIcon = (icon: string | React.ComponentType<any>) => {
     if (typeof icon === "string") {
       if (["CN", "JP", "KR", "US", "RU"].includes(icon)) {
-        return <FlagIcon countryCode={icon} size={16} className="flex-shrink-0" />
+        return <FlagIcon countryCode={icon} size={16} className="flex-shrink: 0" />
       }
-      return <span className="text-base flex-shrink-0">{icon}</span>
+      return <span className="text-base flex-shrink: 0">{icon}</span>
     } else {
       const Icon = icon
-      return <Icon className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+      return <Icon className="h-4 w-4 mt-0.5 flex-shrink: 0 text-muted-foreground" />
     }
   }
 
@@ -67,24 +67,42 @@ function DropdownMenuNav({
         onClick={() => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }}
       >
         {title}
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"
-             className={cn("ml-1 h-3 w-3 transition-transform duration-300", isOpen && "rotate-180")}>
-          <path d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z"
-                fill="currentColor" />
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 15 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={cn("ml-1 h-3 w-3 transition-transform duration-300", isOpen && "rotate-180")}
+        >
+          <path
+            d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z"
+            fill="currentColor"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <div
           className="absolute left-0 top-full mt-1 w-64 rounded-md border bg-popover p-1 text-popover-foreground shadow-md z-50 animate-in fade-in-0 zoom-in-95"
-          onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {items.map((item) => (
-            <Link key={item.href} href={item.href}
-                  className="relative flex cursor-pointer select-none items-start gap-3 rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  onClick={handleLinkClick}>
-              <div className={cn("flex items-center justify-center mt-0.5 flex-shrink-0",
-                                  typeof item.icon === "string" && !["CN","JP","KR","US","RU"].includes(item.icon) ? "w-4 h-4 text-base" : "w-4 h-4")}>
+            <Link
+              key={item.href}
+              href={item.href}
+              className="relative flex cursor-pointer select-none items-start gap-3 rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+              onClick={handleLinkClick}
+            >
+              <div
+                className={cn(
+                  "flex items-center justify-center mt-0.5 flex-shrink: 0",
+                  typeof item.icon === "string" && !["CN", "JP", "KR", "US", "RU"].includes(item.icon)
+                    ? "w-4 h-4 text-base"
+                    : "w-4 h-4"
+                )}
+              >
                 {renderIcon(item.icon)}
               </div>
               <div className="flex flex-col">
@@ -125,40 +143,62 @@ export default function Header() {
     notifyAuth("logout")
   }
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   if (!mounted) return null
 
   const infoMenuItems = [
     { label: "Как заказать", href: "/howorder", description: "Описание процесса заказа автомобиля", icon: Building },
     { label: "О компании", href: "/about", description: "Узнайте детальнее о нашей компании", icon: FileText },
-    { label: "Часто задаваемые вопросы", href: "/faq", description: "Ответы на популярные вопросы клиентов", icon: HelpCircle },
+    {
+      label: "Часто задаваемые вопросы",
+      href: "/faq",
+      description: "Ответы на популярные вопросы клиентов",
+      icon: HelpCircle,
+    },
   ]
 
   const catalogMenuItems = [
     { label: "Авто из Китая", href: "/catalog/china", description: "Широкий выбор китайских автомобилей", icon: "CN" },
-    { label: "Авто из Южной Кореи", href: "/catalog/korea", description: "Качественные корейские автомобили", icon: "KR" },
+    {
+      label: "Авто из Южной Кореи",
+      href: "/catalog/korea",
+      description: "Качественные корейские автомобили",
+      icon: "KR",
+    },
     { label: "Авто из Японии", href: "/catalog/japan", description: "Надежные японские автомобили", icon: "JP" },
   ]
 
   return (
-    <header className="w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-40">
+    <header className="w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background relative z-40">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-12">
         {/* Левая часть: логотип + меню */}
         <div className="flex items-center space-x-4 md:space-x-8">
-          <Link href="/" className="flex items-center flex-shrink-0">
+          <Link href="/" className="flex items-center flex-shrink: 0">
             <Image
               src={theme === "dark" ? "/Logotype_v1_1_bt_v2.png" : "/Logotype_v1_1_lt_v2.png"}
               alt="Sino Auto Import Logo"
               width={120}
               height={32}
               priority
-              className="h-8 w-auto transition-all duration-300 min-w-[120px] flex-shrink-0 select-none"
+              className="h-8 w-auto transition-all duration-300 min-w-[120px] flex-shrink: 0 select-none"
             />
           </Link>
 
           {/* Навигация — desktop */}
           <nav className="hidden xl:flex items-center space-x-1">
-            <DropdownMenuNav title="Каталог авто" items={catalogMenuItems} />
+            {/* Переименовано: Каталог авто → Автомобили */}
+            <DropdownMenuNav title="Автомобили" items={catalogMenuItems} />
+
+            {/* Новая ссылка на запчасти между Автомобили и Информация */}
+            <Link
+              href="/catalog/parts"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-background px-3 py-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+            >
+              Запчасти
+            </Link>
+
             <DropdownMenuNav title="Информация" items={infoMenuItems} />
             <Link
               href="/#contacts"
@@ -176,7 +216,10 @@ export default function Header() {
               variant="ghost"
               size="icon"
               aria-label="Войти или зарегистрироваться"
-              onClick={() => { setAuthTab("login"); setOpenAuth(true); }}
+              onClick={() => {
+                setAuthTab("login")
+                setOpenAuth(true)
+              }}
               className="cursor-pointer"
             >
               <UserRound className="h-5 w-5" />
@@ -202,9 +245,7 @@ export default function Header() {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="truncate">
-                  {me?.name || me?.email}
-                </DropdownMenuLabel>
+                <DropdownMenuLabel className="truncate">{me?.name || me?.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {me?.role === "ADMIN" && (
                   <DropdownMenuItem asChild>
@@ -245,7 +286,12 @@ export default function Header() {
           </Button>
 
           {/* Переключатель темы */}
-          <Button variant="outline" size="icon" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className="cursor-pointer">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            className="cursor-pointer"
+          >
             {theme === "light" ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
           </Button>
 
@@ -264,18 +310,34 @@ export default function Header() {
               </DialogTitle>
 
               <nav className="flex flex-col space-y-3 text-base">
-                <div className="font-semibold text-muted-foreground mb-2">Каталог авто</div>
+                <div className="font-semibold text-muted-foreground mb-2">Автомобили</div>
                 {catalogMenuItems.map((item) => (
-                  <Link key={item.href} href={item.href} className="hover:text-primary transition-colors pl-4 flex items-center gap-2">
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="hover:text-primary transition-colors pl-4 flex items-center gap-2"
+                  >
                     <FlagIcon countryCode={typeof item.icon === "string" ? item.icon : ""} size={16} />
                     {item.label}
                   </Link>
                 ))}
 
+                {/* Запчасти в мобильном меню между Автомобили и Информация */}
+                <Link
+                  href="/catalog/parts"
+                  className="hover:text-primary transition-colors pl-4 block py-1"
+                >
+                  Запчасти
+                </Link>
+
                 <div className="border-t border-border/40 pt-3 mt-2">
                   <div className="font-semibold text-muted-foreground mb-2">Информация</div>
                   {infoMenuItems.map((item) => (
-                    <Link key={item.href} href={item.href} className="hover:text-primary transition-colors pl-4 block py-1">
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="hover:text-primary transition-colors pl-4 block py-1"
+                    >
                       {item.label}
                     </Link>
                   ))}
